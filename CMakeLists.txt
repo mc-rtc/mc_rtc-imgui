@@ -4,6 +4,7 @@ set(mc_rtc-imgui-SRC
   ${CMAKE_CURRENT_LIST_DIR}/widgets/form/widgets.cpp
   ${CMAKE_CURRENT_LIST_DIR}/Category.cpp
   ${CMAKE_CURRENT_LIST_DIR}/Client.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/Plot.cpp
   PARENT_SCOPE
 )
 
@@ -28,5 +29,6 @@ set(mc_rtc-imgui-HDR
   ${CMAKE_CURRENT_LIST_DIR}/Widget.h
   ${CMAKE_CURRENT_LIST_DIR}/Category.h
   ${CMAKE_CURRENT_LIST_DIR}/Client.h
+  ${CMAKE_CURRENT_LIST_DIR}/Plot.h
   PARENT_SCOPE
 )

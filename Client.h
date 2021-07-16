@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Category.h"
+#include "Plot.h"
 
 namespace mc_rtc::imgui
 {
@@ -107,12 +108,49 @@ protected:
                              const std::vector<std::string> & ref,
                              bool send_index) override;
 
+  void start_plot(uint64_t id, const std::string & title) override;
+
+  void plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range) override;
+
+  void plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range) override;
+
+  void plot_setup_yaxis_right(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range) override;
+
+  void plot_point(uint64_t id,
+                  uint64_t did,
+                  const std::string & legend,
+                  double x,
+                  double y,
+                  mc_rtc::gui::Color color,
+                  mc_rtc::gui::plot::Style style,
+                  mc_rtc::gui::plot::Side side) override;
+
+  void plot_polygon(uint64_t id,
+                    uint64_t did,
+                    const std::string & legend,
+                    const mc_rtc::gui::plot::PolygonDescription & polygon,
+                    mc_rtc::gui::plot::Side side) override;
+
+  void plot_polygons(uint64_t id,
+                     uint64_t did,
+                     const std::string & legend,
+                     const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygons,
+                     mc_rtc::gui::plot::Side side) override;
+
+  void end_plot(uint64_t id) override;
+
   void stopped() override;
 
   Category root_;
 
   /** Returns a category (creates it if it does not exist */
   Category & getCategory(const std::vector<std::string> & category);
+
+  /** Currently active plots */
+  std::unordered_map<uint64_t, std::shared_ptr<Plot>> active_plots_;
+
+  /** Currently inactive plots */
+  std::vector<std::shared_ptr<Plot>> inactive_plots_;
 
   /** Get a widget with the right type and id */
   template<typename T, typename... Args>

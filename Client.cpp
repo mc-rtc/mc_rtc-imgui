@@ -48,6 +48,19 @@ void Client::draw2D(ImVec2 windowSize)
     root_.draw2D();
     ImGui::End();
   }
+  if(active_plots_.size() || inactive_plots_.size())
+  {
+    ImGui::Begin("Plots");
+    for(auto & p : active_plots_)
+    {
+      p.second->do_plot();
+    }
+    for(auto & p : inactive_plots_)
+    {
+      p->do_plot();
+    }
+    ImGui::End();
+  }
 }
 
 void Client::draw3D()
@@ -63,6 +76,18 @@ void Client::started()
 void Client::stopped()
 {
   root_.stopped();
+  for(auto it = active_plots_.begin(); it != active_plots_.end();)
+  {
+    if(!it->second->seen())
+    {
+      inactive_plots_.push_back(it->second);
+      it = active_plots_.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
 }
 
 void Client::clear()
@@ -223,5 +248,67 @@ auto Client::getCategory(const std::vector<std::string> & category) -> Category 
   }
   return out.get();
 }
+
+void Client::start_plot(uint64_t id, const std::string & title)
+{
+  if(!active_plots_.count(id))
+  {
+    active_plots_[id] = std::make_shared<Plot>(title);
+  }
+  if(active_plots_[id]->title() != title)
+  {
+    inactive_plots_.push_back(active_plots_[id]);
+    active_plots_.erase(id);
+    active_plots_[id] = std::make_shared<Plot>(title);
+  }
+  active_plots_[id]->start_plot();
+}
+
+void Client::plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  active_plots_[id]->setup_xaxis(legend, range);
+}
+
+void Client::plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  active_plots_[id]->setup_yaxis_left(legend, range);
+}
+
+void Client::plot_setup_yaxis_right(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  active_plots_[id]->setup_yaxis_right(legend, range);
+}
+
+void Client::plot_point(uint64_t id,
+                        uint64_t did,
+                        const std::string & legend,
+                        double x,
+                        double y,
+                        mc_rtc::gui::Color color,
+                        mc_rtc::gui::plot::Style style,
+                        mc_rtc::gui::plot::Side side)
+{
+  active_plots_[id]->plot_point(did, legend, x, y, color, style, side);
+}
+
+void Client::plot_polygon(uint64_t id,
+                          uint64_t did,
+                          const std::string & legend,
+                          const mc_rtc::gui::plot::PolygonDescription & polygon,
+                          mc_rtc::gui::plot::Side side)
+{
+  active_plots_[id]->plot_polygon(did, legend, polygon, side);
+}
+
+void Client::plot_polygons(uint64_t id,
+                           uint64_t did,
+                           const std::string & legend,
+                           const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygons,
+                           mc_rtc::gui::plot::Side side)
+{
+  active_plots_[id]->plot_polygons(did, legend, polygons, side);
+}
+
+void Client::end_plot(uint64_t) {}
 
 } // namespace mc_rtc::imgui
