@@ -55,7 +55,8 @@ void Client::draw2D(ImVec2 windowSize)
   }
   if(active_plots_.size() || inactive_plots_.size())
   {
-    ImGui::Begin("Plots");
+    bool open_plots = true;
+    ImGui::Begin("Plots", active_plots_.size() != 0 ? nullptr : &open_plots);
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_Reorderable;
     if(ImGui::BeginTabBar("Plots", tab_bar_flags))
     {
@@ -90,6 +91,10 @@ void Client::draw2D(ImVec2 windowSize)
       ImGui::EndTabBar();
     }
     ImGui::End();
+    if(!open_plots)
+    {
+      inactive_plots_.clear();
+    }
   }
 }
 
