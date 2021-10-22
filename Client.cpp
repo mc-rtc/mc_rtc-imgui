@@ -56,13 +56,38 @@ void Client::draw2D(ImVec2 windowSize)
   if(active_plots_.size() || inactive_plots_.size())
   {
     ImGui::Begin("Plots");
-    for(auto & p : active_plots_)
+    ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_Reorderable;
+    if(ImGui::BeginTabBar("Plots", tab_bar_flags))
     {
-      p.second->do_plot();
-    }
-    for(auto & p : inactive_plots_)
-    {
-      p->do_plot();
+      size_t id = 0;
+      for(auto & p : active_plots_)
+      {
+        auto tab_id = fmt::format("{}##{}", p.second->title(), id++);
+        ImGui::PushFont(bold_font_);
+        if(ImGui::BeginTabItem(tab_id.c_str()))
+        {
+          ImGui::PopFont();
+          p.second->do_plot();
+          ImGui::EndTabItem();
+        }
+        else
+        {
+          ImGui::PopFont();
+        }
+      }
+      for(auto it = inactive_plots_.begin(); it != inactive_plots_.end();)
+      {
+        auto & p = *it;
+        auto tab_id = fmt::format("{}##{}", p->title(), id++);
+        bool open_ = true;
+        if(ImGui::BeginTabItem(tab_id.c_str(), &open_))
+        {
+          p->do_plot();
+          ImGui::EndTabItem();
+        }
+        it = open_ ? std::next(it) : inactive_plots_.erase(it);
+      }
+      ImGui::EndTabBar();
     }
     ImGui::End();
   }
