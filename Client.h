@@ -32,6 +32,11 @@ struct Client : public mc_control::ControllerClient
     return data_;
   }
 
+  inline void set_bold_font(ImFont * font)
+  {
+    bold_font_ = font;
+  }
+
 protected:
   std::vector<char> buffer_ = std::vector<char>(65535);
   std::chrono::system_clock::time_point t_last_ = std::chrono::system_clock::now();
@@ -151,6 +156,9 @@ protected:
 
   /** Currently inactive plots */
   std::vector<std::shared_ptr<Plot>> inactive_plots_;
+
+  /** Bold font, default font if unset */
+  ImFont * bold_font_ = nullptr;
 
   /** Get a widget with the right type and id */
   template<typename T, typename... Args>

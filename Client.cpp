@@ -35,6 +35,11 @@ void Client::update()
 
 void Client::draw2D(ImVec2 windowSize)
 {
+  if(!bold_font_)
+  {
+    ImGuiIO & io = ImGui::GetIO();
+    bold_font_ = io.FontDefault;
+  }
   auto left_margin = 15;
   auto top_margin = 50;
   auto bottom_margin = 50;
