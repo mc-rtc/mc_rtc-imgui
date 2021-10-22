@@ -202,8 +202,8 @@ void Plot::do_plot()
       for(const auto & p : group.polygons)
       {
         plot_poly(p, group.side);
-        ImPlot::EndItem();
       }
+      ImPlot::EndItem();
     }
   }
   for(const auto & pp : plots_)
