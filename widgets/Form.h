@@ -80,6 +80,14 @@ struct Form : public Widget
         }
       }
       client.send_request(id, data);
+      for(auto & w : requiredWidgets_)
+      {
+        w->unlock();
+      }
+      for(auto & w : otherWidgets_)
+      {
+        w->unlock();
+      }
     }
   }
 
@@ -94,6 +102,10 @@ protected:
     if(it == widgets.end())
     {
       widgets.push_back(std::make_unique<WidgetT>(*this, name, std::forward<Args>(args)...));
+    }
+    else
+    {
+      (*it)->template update<WidgetT>(std::forward<Args>(args)...);
     }
   }
 };

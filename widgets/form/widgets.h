@@ -19,7 +19,30 @@ struct Widget
 
   virtual bool ready() = 0;
 
-  virtual void draw() = 0;
+  inline void lock()
+  {
+    locked_ = true;
+  }
+
+  inline void unlock()
+  {
+    locked_ = false;
+  }
+
+  void draw()
+  {
+    draw_();
+    if(locked_)
+    {
+      ImGui::SameLine();
+      if(ImGui::Button(label("Reset").c_str()))
+      {
+        locked_ = false;
+      }
+    }
+  }
+
+  virtual void draw_() = 0;
 
   /** A form widget is trivial if it doesn't contain other widgets */
   inline virtual bool trivial() const
@@ -62,9 +85,20 @@ struct Widget
     return parent_;
   }
 
+  template<typename Derived, typename ... Args>
+  void update(Args && ... args)
+  {
+    if(locked_)
+    {
+      return;
+    }
+    static_cast<Derived *>(this)->update_(std::forward<Args>(args)...);
+  }
+
 protected:
   const ::mc_rtc::imgui::Widget & parent_;
   std::string name_;
+  bool locked_ = false;
 };
 
 template<typename DataT>
@@ -137,6 +171,15 @@ struct SimpleInput : public Widget
     }
   }
 
+  void update_(const std::optional<DataT> & value)
+  {
+    value_ = value;
+    if(value_.has_value())
+    {
+      temp_ = value_.value();
+    }
+  }
+
 protected:
   std::optional<DataT> value_;
   DataT temp_;
@@ -146,11 +189,12 @@ struct Checkbox : public SimpleInput<bool>
 {
   using SimpleInput::SimpleInput;
 
-  inline void draw() override
+  inline void draw_() override
   {
     if(ImGui::Checkbox(label(name_).c_str(), &temp_))
     {
       value_ = temp_;
+      locked_ = true;
     }
   }
 };
@@ -159,11 +203,12 @@ struct IntegerInput : public SimpleInput<int>
 {
   using SimpleInput::SimpleInput;
 
-  inline void draw() override
+  inline void draw_() override
   {
     if(ImGui::InputInt(label(name_).c_str(), &temp_, 0, 0))
     {
       value_ = temp_;
+      locked_ = true;
     }
   }
 };
@@ -172,11 +217,12 @@ struct NumberInput : public SimpleInput<double>
 {
   using SimpleInput::SimpleInput;
 
-  inline void draw() override
+  inline void draw_() override
   {
     if(ImGui::InputDouble(label(name_).c_str(), &temp_))
     {
       value_ = temp_;
+      locked_ = true;
     }
   }
 };
@@ -185,19 +231,21 @@ struct StringInput : public SimpleInput<std::string>
 {
   using SimpleInput::SimpleInput;
 
-  inline void draw() override
+  inline void draw_() override
   {
     const auto & value = value_.has_value() ? value_.value() : "";
     if(buffer_.size() < std::max<size_t>(value.size() + 1, 256))
     {
       buffer_.resize(std::max<size_t>(value.size() + 1, 256));
-      std::memcpy(buffer_.data(), value.data(), value.size());
-      buffer_[value.size()] = 0;
     }
+    std::memcpy(buffer_.data(), value.data(), value.size());
+    buffer_[value.size()] = 0;
     if(ImGui::InputText(label(name_).c_str(), buffer_.data(), buffer_.size()))
     {
       value_ = {buffer_.data(), strnlen(buffer_.data(), buffer_.size())};
+      locked_ = true;
     }
+    ImGui::Columns(1);
   }
 
 private:
@@ -208,10 +256,16 @@ struct ArrayInput : public SimpleInput<Eigen::VectorXd>
 {
   ArrayInput(const ::mc_rtc::imgui::Widget & parent,
              const std::string & name,
-             const Eigen::VectorXd & default_,
+             const std::optional<Eigen::VectorXd> & default_,
              bool fixed_size);
 
-  void draw() override;
+  void draw_() override;
+
+  inline void update_(const std::optional<Eigen::VectorXd> & value, bool fixed)
+  {
+    SimpleInput<Eigen::VectorXd>::update_(value);
+    fixed_ = fixed;
+  }
 
 private:
   bool fixed_;
@@ -222,9 +276,10 @@ struct ComboInput : public SimpleInput<std::string>
   ComboInput(const ::mc_rtc::imgui::Widget & parent,
              const std::string & name,
              const std::vector<std::string> & values,
-             bool send_index);
+             bool send_index,
+             int user_default = -1);
 
-  void draw() override;
+  void draw_() override;
 
   inline void collect(mc_rtc::Configuration & out) override
   {
@@ -238,6 +293,8 @@ struct ComboInput : public SimpleInput<std::string>
       out.add(name(), value_.value());
     }
   }
+
+  void update_(const std::vector<std::string> & values, bool send_index, int user_default = -1);
 
 protected:
   std::vector<std::string> values_;
@@ -254,7 +311,7 @@ struct DataComboInput : public ComboInput
                  const std::vector<std::string> & ref,
                  bool send_index);
 
-  void draw() override;
+  void draw_() override;
 
 protected:
   std::vector<std::string> ref_;

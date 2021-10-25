@@ -209,45 +209,70 @@ void Client::form(const ElementId & id)
   widget<Form>(id);
 }
 
-void Client::form_checkbox(const ElementId & id, const std::string & name, bool required, bool default_)
+template<typename T>
+std::optional<T> null_or_default(const T & value, bool user_default)
 {
-  widget<Form>(id).widget<form::Checkbox>(name, required, default_);
+  if(user_default)
+  {
+    return value;
+  }
+  return std::nullopt;
 }
 
-void Client::form_integer_input(const ElementId & id, const std::string & name, bool required, int default_)
+void Client::form_checkbox(const ElementId & id,
+                           const std::string & name,
+                           bool required,
+                           bool default_,
+                           bool user_default)
 {
-  widget<Form>(id).widget<form::IntegerInput>(name, required, default_);
+  widget<Form>(id).widget<form::Checkbox>(name, required, null_or_default(default_, user_default));
 }
 
-void Client::form_number_input(const ElementId & id, const std::string & name, bool required, double default_)
+void Client::form_integer_input(const ElementId & id,
+                                const std::string & name,
+                                bool required,
+                                int default_,
+                                bool user_default)
 {
-  widget<Form>(id).widget<form::NumberInput>(name, required, default_);
+  widget<Form>(id).widget<form::IntegerInput>(name, required, null_or_default(default_, user_default));
+}
+
+void Client::form_number_input(const ElementId & id,
+                               const std::string & name,
+                               bool required,
+                               double default_,
+                               bool user_default)
+{
+  widget<Form>(id).widget<form::NumberInput>(name, required, null_or_default(default_, user_default));
 }
 
 void Client::form_string_input(const ElementId & id,
                                const std::string & name,
                                bool required,
-                               const std::string & default_)
+                               const std::string & default_,
+                               bool user_default)
 {
-  widget<Form>(id).widget<form::StringInput>(name, required, default_);
+  widget<Form>(id).widget<form::StringInput>(name, required, null_or_default(default_, user_default));
 }
 
 void Client::form_array_input(const ElementId & id,
                               const std::string & name,
                               bool required,
                               const Eigen::VectorXd & default_,
-                              bool fixed_size)
+                              bool fixed_size,
+                              bool user_default)
 {
-  widget<Form>(id).widget<form::ArrayInput>(name, required, default_, fixed_size);
+  widget<Form>(id).widget<form::ArrayInput>(name, required, null_or_default(default_, user_default), fixed_size);
 }
 
 void Client::form_combo_input(const ElementId & id,
                               const std::string & name,
                               bool required,
                               const std::vector<std::string> & values,
-                              bool send_index)
+                              bool send_index,
+                              int user_default)
 {
-  widget<Form>(id).widget<form::ComboInput>(name, required, values, send_index);
+  widget<Form>(id).widget<form::ComboInput>(name, required, values, send_index, user_default);
 }
 
 void Client::form_data_combo_input(const ElementId & id,

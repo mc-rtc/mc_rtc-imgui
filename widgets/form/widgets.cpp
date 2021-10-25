@@ -11,13 +11,13 @@ namespace form
 
 ArrayInput::ArrayInput(const ::mc_rtc::imgui::Widget & parent,
                        const std::string & name,
-                       const Eigen::VectorXd & default_,
+                       const std::optional<Eigen::VectorXd> & default_,
                        bool fixed_size)
 : SimpleInput::SimpleInput(parent, name, default_), fixed_(fixed_size)
 {
 }
 
-void ArrayInput::draw()
+void ArrayInput::draw_()
 {
   ImGui::Columns(2);
   for(size_t i = 0; i < static_cast<size_t>(temp_.size()); ++i)
@@ -25,6 +25,7 @@ void ArrayInput::draw()
     if(ImGui::InputDouble(label(fmt::format("{}", i)).c_str(), &temp_(i)))
     {
       value_ = temp_;
+      locked_ = true;
     }
     if(!fixed_)
     {
@@ -57,23 +58,34 @@ void ArrayInput::draw()
   }
   ImGui::NextColumn();
   ImGui::Text("%s", name().c_str());
-  ImGui::Columns(1);
 }
 
 ComboInput::ComboInput(const ::mc_rtc::imgui::Widget & parent,
                        const std::string & name,
                        const std::vector<std::string> & values,
-                       bool send_index)
-: SimpleInput(parent, name, ""), values_(values), idx_(values_.size()), send_index_(send_index)
+                       bool send_index,
+                       int user_default)
+: SimpleInput(parent, name), values_(values), idx_(values_.size()), send_index_(send_index)
 {
   if(values_.size() == 1)
   {
     value_ = values_[0];
     idx_ = 0;
   }
+  if(user_default != -1 && static_cast<size_t>(user_default) < values_.size())
+  {
+    value_ = values_[static_cast<size_t>(user_default)];
+    idx_ = static_cast<size_t>(user_default);
+  }
 }
 
-void ComboInput::draw()
+void ComboInput::update_(const std::vector<std::string> & values, bool send_index, int)
+{
+  values_ = values;
+  send_index_ = send_index;
+}
+
+void ComboInput::draw_()
 {
   const char * label = idx_ < values_.size() ? values_[idx_].c_str() : "";
   draw(label);
@@ -111,7 +123,7 @@ DataComboInput::DataComboInput(const ::mc_rtc::imgui::Widget & parent,
 {
 }
 
-void DataComboInput::draw()
+void DataComboInput::draw_()
 {
   auto getValue = [&](const std::string & value) {
     auto * form_ptr = dynamic_cast<const Form *>(&parent_);

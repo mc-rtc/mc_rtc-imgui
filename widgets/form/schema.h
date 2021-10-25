@@ -14,7 +14,7 @@ struct ArrayForm : public Widget
 
   bool ready() override;
 
-  void draw() override;
+  void draw_() override;
 
   void collect(mc_rtc::Configuration & out) override;
 
@@ -48,7 +48,7 @@ struct ObjectForm : public Widget
 
   void draw(bool show_header);
 
-  void draw() override;
+  void draw_() override;
 
   void collect(mc_rtc::Configuration & out) override;
 

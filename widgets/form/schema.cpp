@@ -94,7 +94,7 @@ bool ArrayForm::ready()
   return !isArrayOfArray_ && std::any_of(widgets_.begin(), widgets_.end(), [](const auto & w) { return w->ready(); });
 }
 
-void ArrayForm::draw()
+void ArrayForm::draw_()
 {
   if(isArrayOfArray_)
   {
@@ -354,7 +354,7 @@ void ObjectForm::collect(mc_rtc::Configuration & out)
   }
 }
 
-void ObjectForm::draw()
+void ObjectForm::draw_()
 {
   draw(true);
 }
