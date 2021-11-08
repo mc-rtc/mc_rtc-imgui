@@ -40,6 +40,7 @@ struct Widget
         locked_ = false;
       }
     }
+    ImGui::Columns(1);
   }
 
   virtual void draw_() = 0;
