@@ -113,7 +113,7 @@ void Plot::do_plot()
 {
   ImPlotAxisFlags x_flags = ImPlotAxisFlags_AutoFit;
   ImPlotAxisFlags y_flags = ImPlotAxisFlags_AutoFit;
-  ImPlotAxisFlags y2_flags = ImPlotAxisFlags_AutoFit;
+  ImPlotAxisFlags y2_flags = ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_Opposite;
   const char * y_label = y_label_.c_str();
   if(y_plots_ == 0)
   {
@@ -130,28 +130,32 @@ void Plot::do_plot()
     y2_flags = ImPlotAxisFlags_NoDecorations;
     y2_label = nullptr;
   }
-  if(x_limits_)
-  {
-    ImPlot::SetNextPlotLimitsX(x_limits_->first, x_limits_->second, ImGuiCond_Always);
-  }
-  if(y_limits_)
-  {
-    ImPlot::SetNextPlotLimitsY(y_limits_->first, y_limits_->second, ImGuiCond_Always, ImPlotYAxis_1);
-  }
-  if(y2_limits_)
-  {
-    ImPlot::SetNextPlotLimitsY(y2_limits_->first, y2_limits_->second, ImGuiCond_Always, ImPlotYAxis_2);
-  }
-  // clang-format off
-  bool do_ = ImPlot::BeginPlot(fmt::format("{}##{}", title_, uid_).c_str(),
-                               x_label_.c_str(), y_label, ImVec2{-1, 0},
-                               ImPlotFlags_AntiAliased | ImPlotFlags_YAxis2,
-                               x_flags, y_flags, y2_flags, ImPlotAxisFlags_None,
-                               y2_label, nullptr);
-  // clang-format on
+  bool do_ = ImPlot::BeginPlot(fmt::format("{}##{}", title_, uid_).c_str(), ImVec2{-1, 0},
+                               ImPlotFlags_AntiAliased | ImPlotFlags_YAxis2);
   if(!do_)
   {
     return;
+  }
+  ImPlot::SetupAxis(ImAxis_X1, x_label_.c_str(), x_flags);
+  if(y_plots_ != 0)
+  {
+    ImPlot::SetupAxis(ImAxis_Y1, y_label, y_flags);
+  }
+  if(y2_plots_ != 0)
+  {
+    ImPlot::SetupAxis(ImAxis_Y2, y2_label, y2_flags);
+  }
+  if(x_limits_)
+  {
+    ImPlot::SetupAxisLimits(ImAxis_X1, x_limits_->first, x_limits_->second, ImGuiCond_Always);
+  }
+  if(y_limits_)
+  {
+    ImPlot::SetupAxisLimits(ImAxis_Y1, y_limits_->first, y_limits_->second, ImGuiCond_Always);
+  }
+  if(y2_limits_)
+  {
+    ImPlot::SetupAxisLimits(ImAxis_Y2, y2_limits_->first, y2_limits_->second, ImGuiCond_Always);
   }
   auto toImVec4 = [](const Color & color) {
     return ImVec4{static_cast<float>(color.r), static_cast<float>(color.g), static_cast<float>(color.b),
@@ -170,7 +174,7 @@ void Plot::do_plot()
     const auto & fillColor = poly.fill();
     bool closed = poly.closed();
     points_.resize(poly.points().size());
-    ImPlot::SetPlotYAxis(side == Side::Left ? ImPlotYAxis_1 : ImPlotYAxis_2);
+    ImPlot::SetAxis(side == Side::Left ? ImAxis_Y1 : ImAxis_Y2);
     for(size_t i = 0; i < poly.points().size(); ++i)
     {
       points_[i] = ImPlot::PlotToPixels(poly.points()[i][0], poly.points()[i][1]);
@@ -209,7 +213,7 @@ void Plot::do_plot()
   for(const auto & pp : plots_)
   {
     const auto & p = pp.second;
-    ImPlot::SetPlotYAxis(p.side == Side::Left ? ImPlotYAxis_1 : ImPlotYAxis_2);
+    ImPlot::SetAxis(p.side == Side::Left ? ImAxis_Y1 : ImAxis_Y2);
     if(p.style == Style::Point)
     {
       ImPlot::SetNextLineStyle({0, 0, 0, 0});
@@ -233,9 +237,9 @@ void Plot::do_plot()
   }
   {
     auto ctx = ImPlot::GetCurrentContext();
-    x_range_ = ctx->ExtentsX;
-    y_range_ = ctx->ExtentsY[0];
-    y2_range_ = ctx->ExtentsY[1];
+    x_range_ = ctx->CurrentPlot->Axes[ImAxis_X1].FitExtents;
+    y_range_ = ctx->CurrentPlot->Axes[ImAxis_Y1].FitExtents;
+    y2_range_ = ctx->CurrentPlot->Axes[ImAxis_Y2].FitExtents;
   }
   ImPlot::EndPlot();
 }
