@@ -251,6 +251,10 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
           key = fmt::format("{}##{}", key, name);
           widget = std::make_unique<DataComboInput>(parent, nextName, std::vector<std::string>{"surfaces", key}, false);
         }
+        else if(p.first == "frame")
+        {
+          widget = std::make_unique<DataComboInput>(parent, nextName, std::vector<std::string>{"frames", fmt::format("$robot##{}", name)}, false);
+        }
         else
         {
           widget = std::make_unique<StringInput>(parent, nextName, get_default<std::string>(p.second));
