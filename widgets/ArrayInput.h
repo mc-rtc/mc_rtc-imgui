@@ -23,21 +23,24 @@ struct ArrayInput : public Widget
   inline void draw2D() override
   {
     int flags = busy_ ? ImGuiInputTextFlags_None : ImGuiInputTextFlags_ReadOnly;
-    int columns = labels_.size() ? 3 : 2;
     double * source = busy_ ? buffer_.data() : data_.data();
     bool edit_done_ = false;
-    ImGui::Columns(columns);
     ImGui::Text("%s", id.name.c_str());
+    ImGui::SameLine();
     edit_done_ = ImGui::Button(label(busy_ ? "Done" : "Edit").c_str());
-    ImGui::NextColumn();
+    ImGui::Columns(data_.size());
     if(labels_.size())
     {
       for(size_t i = 0; i < std::min<size_t>(labels_.size(), data_.size()); ++i)
       {
         const auto & l = labels_[i];
         ImGui::Text("%s", l.c_str());
+        ImGui::NextColumn();
       }
-      ImGui::NextColumn();
+      for(size_t i = labels_.size(); i < static_cast<size_t>(data_.size()); ++i)
+      {
+        ImGui::NextColumn();
+      }
     }
     for(int i = 0; i < data_.size(); ++i)
     {
@@ -46,7 +49,9 @@ struct ArrayInput : public Widget
                    || (ImGui::IsItemDeactivatedAfterEdit()
                        && (ImGui::IsKeyPressed(ImGui::GetIO().KeyMap[ImGuiKey_Enter])
                            || ImGui::IsKeyPressed(ImGui::GetIO().KeyMap[ImGuiKey_KeyPadEnter])));
+      ImGui::NextColumn();
     }
+    ImGui::Columns(1);
     if(edit_done_)
     {
       if(busy_)
@@ -64,7 +69,6 @@ struct ArrayInput : public Widget
         busy_ = true;
       }
     }
-    ImGui::Columns(1);
   }
 
 private:
