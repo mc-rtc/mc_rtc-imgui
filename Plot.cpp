@@ -130,8 +130,7 @@ void Plot::do_plot()
     y2_flags = ImPlotAxisFlags_NoDecorations;
     y2_label = nullptr;
   }
-  bool do_ = ImPlot::BeginPlot(fmt::format("{}##{}", title_, uid_).c_str(), ImVec2{-1, 0},
-                               ImPlotFlags_AntiAliased | ImPlotFlags_YAxis2);
+  bool do_ = ImPlot::BeginPlot(fmt::format("{}##{}", title_, uid_).c_str(), ImVec2{-1, 0}, ImPlotFlags_YAxis2);
   if(!do_)
   {
     return;

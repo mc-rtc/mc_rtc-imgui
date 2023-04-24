@@ -47,8 +47,7 @@ struct ArrayInput : public Widget
       ImGui::InputDouble(label("", i).c_str(), &source[i], 0.0, 0.0, "%.6g", flags);
       edit_done_ = edit_done_
                    || (ImGui::IsItemDeactivatedAfterEdit()
-                       && (ImGui::IsKeyPressed(ImGui::GetIO().KeyMap[ImGuiKey_Enter])
-                           || ImGui::IsKeyPressed(ImGui::GetIO().KeyMap[ImGuiKey_KeyPadEnter])));
+                       && (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_KeyPadEnter)));
       ImGui::NextColumn();
     }
     ImGui::Columns(1);
