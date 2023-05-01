@@ -1,32 +1,44 @@
 #include "Category.h"
 
-#include "imgui.h"
+#include "widgets/IndentedSeparator.h"
 
 namespace mc_rtc::imgui
 {
 
 void Category::draw2D()
 {
-  int sid = -100;
-  for(auto & w : widgets)
+  for(size_t i = 0; i < widgets.size();)
   {
-    if(w->id.sid == sid && sid != -1)
+    auto & w = widgets[i];
+    if(w->id.sid == -1)
     {
-      ImGui::SameLine();
+      w->draw2D();
+      ++i;
+      if(i != widgets.size())
+      {
+        IndentedSeparator();
+      }
+      continue;
     }
-    else if(sid != -100)
+    size_t j = i + 1;
+    while(j < widgets.size() && widgets[j]->id.sid == w->id.sid)
     {
-      ImGui::Separator();
+      ++j;
     }
-    w->draw2D();
-    sid = w->id.sid;
+    ImGui::BeginTable(fmt::format("{}_table_{}", w->id.category, i).c_str(), j - i, ImGuiTableFlags_SizingStretchProp);
+    for(; i < j; ++i)
+    {
+      ImGui::TableNextColumn();
+      widgets[i]->draw2D();
+    }
+    ImGui::EndTable();
+    if(i != widgets.size())
+    {
+      IndentedSeparator();
+    }
   }
   if(categories.size())
   {
-    if(widgets.size())
-    {
-      ImGui::Separator();
-    }
     ImGui::Indent();
     std::sort(categories.begin(), categories.end(),
               [](const auto & lhs, const auto & rhs) { return lhs->name < rhs->name; });

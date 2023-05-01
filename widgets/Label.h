@@ -20,7 +20,7 @@ struct Label : public Widget
   {
     if(txt_.size())
     {
-      ImGui::LabelText(txt_.c_str(), "%s", id.name.c_str());
+      ImGui::Text("%s %s", id.name.c_str(), txt_.c_str());
     }
     else
     {

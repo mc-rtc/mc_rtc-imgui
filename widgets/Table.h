@@ -24,21 +24,22 @@ struct Table : public Widget
 
   void draw2D() override
   {
-    auto drawVec = [](const std::vector<std::string> & vec) {
+    auto drawVec = [](const std::vector<std::string> & vec)
+    {
       for(const auto & v : vec)
       {
+        ImGui::TableNextColumn();
         ImGui::Text("%s", v.c_str());
-        ImGui::NextColumn();
       }
     };
     ImGui::Text("%s", id.name.c_str());
-    ImGui::Columns(header_.size());
+    ImGui::BeginTable(label("", "_table_data").c_str(), header_.size(), ImGuiTableFlags_SizingStretchProp);
     drawVec(header_);
     for(const auto & d : data_)
     {
       drawVec(d);
     }
-    ImGui::Columns(1);
+    ImGui::EndTable();
   }
 
 private:

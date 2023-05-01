@@ -19,7 +19,8 @@ struct ComboInput : public Widget
 
   inline void draw2D() override
   {
-    size_t idx = [&]() {
+    size_t idx = [&]()
+    {
       size_t i = 0;
       for(; i < values_.size(); ++i)
       {
@@ -31,7 +32,9 @@ struct ComboInput : public Widget
       return i;
     }();
     const char * label_ = idx < values_.size() ? data_.c_str() : "";
-    if(ImGui::BeginCombo(label(id.name).c_str(), label_))
+    ImGui::Text("%s", id.name.c_str());
+    ImGui::SameLine();
+    if(ImGui::BeginCombo(label("").c_str(), label_))
     {
       for(size_t i = 0; i < values_.size(); ++i)
       {

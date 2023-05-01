@@ -28,29 +28,26 @@ struct ArrayInput : public Widget
     ImGui::Text("%s", id.name.c_str());
     ImGui::SameLine();
     edit_done_ = ImGui::Button(label(busy_ ? "Done" : "Edit").c_str());
-    ImGui::Columns(data_.size());
+    ImGui::BeginTable(label("", "_table_data").c_str(), data_.size(), ImGuiTableFlags_SizingStretchProp);
     if(labels_.size())
     {
       for(size_t i = 0; i < std::min<size_t>(labels_.size(), data_.size()); ++i)
       {
         const auto & l = labels_[i];
+        ImGui::TableNextColumn();
         ImGui::Text("%s", l.c_str());
-        ImGui::NextColumn();
-      }
-      for(size_t i = labels_.size(); i < static_cast<size_t>(data_.size()); ++i)
-      {
-        ImGui::NextColumn();
       }
     }
+    ImGui::TableNextRow();
     for(int i = 0; i < data_.size(); ++i)
     {
+      ImGui::TableNextColumn();
       ImGui::InputDouble(label("", i).c_str(), &source[i], 0.0, 0.0, "%.6g", flags);
       edit_done_ = edit_done_
                    || (ImGui::IsItemDeactivatedAfterEdit()
                        && (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_KeyPadEnter)));
-      ImGui::NextColumn();
     }
-    ImGui::Columns(1);
+    ImGui::EndTable();
     if(edit_done_)
     {
       if(busy_)

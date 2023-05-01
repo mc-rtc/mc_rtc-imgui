@@ -31,7 +31,7 @@ struct Widget
 
   void draw()
   {
-    draw_();
+    ImGui::Text("%s", name().c_str());
     if(locked_)
     {
       ImGui::SameLine();
@@ -40,7 +40,7 @@ struct Widget
         locked_ = false;
       }
     }
-    ImGui::Columns(1);
+    draw_();
   }
 
   virtual void draw_() = 0;
@@ -86,8 +86,8 @@ struct Widget
     return parent_;
   }
 
-  template<typename Derived, typename ... Args>
-  void update(Args && ... args)
+  template<typename Derived, typename... Args>
+  void update(Args &&... args)
   {
     if(locked_)
     {
@@ -192,7 +192,8 @@ struct Checkbox : public SimpleInput<bool>
 
   inline void draw_() override
   {
-    if(ImGui::Checkbox(label(name_).c_str(), &temp_))
+    ImGui::SameLine();
+    if(ImGui::Checkbox(label("").c_str(), &temp_))
     {
       value_ = temp_;
       locked_ = true;
@@ -206,7 +207,8 @@ struct IntegerInput : public SimpleInput<int>
 
   inline void draw_() override
   {
-    if(ImGui::InputInt(label(name_).c_str(), &temp_, 0, 0))
+    ImGui::SameLine();
+    if(ImGui::InputInt(label("").c_str(), &temp_, 0, 0))
     {
       value_ = temp_;
       locked_ = true;
@@ -220,7 +222,8 @@ struct NumberInput : public SimpleInput<double>
 
   inline void draw_() override
   {
-    if(ImGui::InputDouble(label(name_).c_str(), &temp_))
+    ImGui::SameLine();
+    if(ImGui::InputDouble(label("").c_str(), &temp_))
     {
       value_ = temp_;
       locked_ = true;
@@ -234,6 +237,7 @@ struct StringInput : public SimpleInput<std::string>
 
   inline void draw_() override
   {
+    ImGui::SameLine();
     const auto & value = value_.has_value() ? value_.value() : "";
     if(buffer_.size() < std::max<size_t>(value.size() + 1, 256))
     {
@@ -241,12 +245,11 @@ struct StringInput : public SimpleInput<std::string>
     }
     std::memcpy(buffer_.data(), value.data(), value.size());
     buffer_[value.size()] = 0;
-    if(ImGui::InputText(label(name_).c_str(), buffer_.data(), buffer_.size()))
+    if(ImGui::InputText(label("").c_str(), buffer_.data(), buffer_.size()))
     {
       value_ = {buffer_.data(), strnlen(buffer_.data(), buffer_.size())};
       locked_ = true;
     }
-    ImGui::Columns(1);
   }
 
 private:

@@ -1,5 +1,7 @@
 #include "schema.h"
 
+#include "../IndentedSeparator.h"
+
 namespace mc_rtc::imgui
 {
 
@@ -104,9 +106,18 @@ void ArrayForm::draw_()
   {
     ImGui::Indent();
     size_t removeAt = widgets_.size();
-    ImGui::Columns(span(minSize_, maxSize_));
+    size_t columns = (!isArrayOfObject_ && widgets_.size() >= 2 && widgets_.size() <= 7) ? widgets_.size()
+                                                                                         : span(minSize_, maxSize_);
+    if(columns > 1)
+    {
+      ImGui::BeginTable(label("", "table").c_str(), columns, ImGuiTableFlags_SizingStretchProp);
+    }
     for(size_t i = 0; i < widgets_.size(); ++i)
     {
+      if(columns > 1)
+      {
+        ImGui::TableNextColumn();
+      }
       widgets_[i]->draw();
       if(widgets_.size() > minSize_)
       {
@@ -116,15 +127,17 @@ void ArrayForm::draw_()
           removeAt = i;
         }
       }
-      ImGui::NextColumn();
     }
+    if(columns > 1)
+    {
+      ImGui::EndTable();
+    }
+    removeWidget(removeAt);
     if(widgets_.size() < maxSize_ && ImGui::Button(label("+").c_str()))
     {
       addWidget();
     }
-    removeWidget(removeAt);
     ImGui::Unindent();
-    ImGui::Columns(1);
   }
 }
 
@@ -253,7 +266,8 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
         }
         else if(p.first == "frame")
         {
-          widget = std::make_unique<DataComboInput>(parent, nextName, std::vector<std::string>{"frames", fmt::format("$robot##{}", name)}, false);
+          widget = std::make_unique<DataComboInput>(
+              parent, nextName, std::vector<std::string>{"frames", fmt::format("$robot##{}", name)}, false);
         }
         else
         {
@@ -292,18 +306,20 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
       widgets_.push_back(std::move(widget));
     }
   }
-  std::sort(widgets_.begin(), widgets_.end(), [](const WidgetPtr & lhs, const WidgetPtr & rhs) {
-    // lhs is trivial, it's "smaller" if rhs is non trivial or rhs is trivial and has a smaller name
-    if(lhs->trivial())
-    {
-      return !rhs->trivial() || (rhs->trivial() && lhs->fullName() < rhs->fullName());
-    }
-    // lhs is non-trivial, it's smaller than rhs if rhs is also non-trivial and has a smaller name
-    else
-    {
-      return !rhs->trivial() && lhs->fullName() < rhs->fullName();
-    }
-  });
+  std::sort(widgets_.begin(), widgets_.end(),
+            [](const WidgetPtr & lhs, const WidgetPtr & rhs)
+            {
+              // lhs is trivial, it's "smaller" if rhs is non trivial or rhs is trivial and has a smaller name
+              if(lhs->trivial())
+              {
+                return !rhs->trivial() || (rhs->trivial() && lhs->fullName() < rhs->fullName());
+              }
+              // lhs is non-trivial, it's smaller than rhs if rhs is also non-trivial and has a smaller name
+              else
+              {
+                return !rhs->trivial() && lhs->fullName() < rhs->fullName();
+              }
+            });
 }
 
 bool ObjectForm::ready()
@@ -319,19 +335,24 @@ void ObjectForm::draw(bool show_header)
     {
       ImGui::Indent();
     }
-    for(auto & w : required_)
+    for(size_t i = 0; i < required_.size(); ++i)
     {
-      w->draw();
-      ImGui::Separator();
+      required_[i]->draw();
+      if(i + 1 != required_.size())
+      {
+        IndentedSeparator();
+      }
     }
     if(widgets_.size() && ImGui::CollapsingHeader(label("Optional fields").c_str()))
     {
-      ImGui::Separator();
       ImGui::Indent();
-      for(auto & w : widgets_)
+      for(size_t i = 0; i < widgets_.size(); ++i)
       {
-        w->draw();
-        ImGui::Separator();
+        widgets_[i]->draw();
+        if(i + 1 != widgets_.size())
+        {
+          IndentedSeparator();
+        }
       }
       ImGui::Unindent();
     }
@@ -365,7 +386,8 @@ void ObjectForm::draw_()
 
 std::optional<std::string> ObjectForm::value(const std::string & name) const
 {
-  auto value_ = [&name](const std::vector<WidgetPtr> & widgets) -> std::optional<std::string> {
+  auto value_ = [&name](const std::vector<WidgetPtr> & widgets) -> std::optional<std::string>
+  {
     for(const auto & w : widgets)
     {
       if(w->fullName() == name)

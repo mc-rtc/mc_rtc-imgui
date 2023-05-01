@@ -20,7 +20,9 @@ struct NumberSlider : public Widget
 
   inline void draw2D() override
   {
-    if(ImGui::SliderFloat(id.name.c_str(), &data_, min_, max_))
+    ImGui::Text("%s", id.name.c_str());
+    ImGui::SameLine();
+    if(ImGui::SliderFloat(label("").c_str(), &data_, min_, max_))
     {
       client.send_request(id, data_);
     }

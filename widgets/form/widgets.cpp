@@ -19,10 +19,18 @@ ArrayInput::ArrayInput(const ::mc_rtc::imgui::Widget & parent,
 
 void ArrayInput::draw_()
 {
-  ImGui::Columns(2);
+  bool table_layout = temp_.size() > 1 && temp_.size() <= 7;
+  if(table_layout)
+  {
+    ImGui::BeginTable(label("", "table").c_str(), temp_.size(), ImGuiTableFlags_SizingStretchProp);
+  }
   for(size_t i = 0; i < static_cast<size_t>(temp_.size()); ++i)
   {
-    if(ImGui::InputDouble(label(fmt::format("{}", i)).c_str(), &temp_(i)))
+    if(table_layout)
+    {
+      ImGui::TableNextColumn();
+    }
+    if(ImGui::InputDouble(label("", fmt::format("{}", i)).c_str(), &temp_(i)))
     {
       value_ = temp_;
       locked_ = true;
@@ -46,6 +54,10 @@ void ArrayInput::draw_()
       }
     }
   }
+  if(table_layout)
+  {
+    ImGui::EndTable();
+  }
   if(!fixed_)
   {
     if(ImGui::Button(label("+").c_str()))
@@ -56,8 +68,6 @@ void ArrayInput::draw_()
       value_ = temp_;
     }
   }
-  ImGui::NextColumn();
-  ImGui::Text("%s", name().c_str());
 }
 
 ComboInput::ComboInput(const ::mc_rtc::imgui::Widget & parent,
@@ -79,10 +89,20 @@ ComboInput::ComboInput(const ::mc_rtc::imgui::Widget & parent,
   }
 }
 
-void ComboInput::update_(const std::vector<std::string> & values, bool send_index, int)
+void ComboInput::update_(const std::vector<std::string> & values, bool send_index, int user_default)
 {
   values_ = values;
   send_index_ = send_index;
+  if(user_default != -1 && static_cast<size_t>(user_default) < values_.size())
+  {
+    value_ = values_[static_cast<size_t>(user_default)];
+    idx_ = static_cast<size_t>(user_default);
+  }
+  else
+  {
+    value_ = "";
+    idx_ = values_.size();
+  }
 }
 
 void ComboInput::draw_()
@@ -97,13 +117,15 @@ void ComboInput::draw(const char * label_)
   {
     return;
   }
-  if(ImGui::BeginCombo(label(name_).c_str(), label_))
+  ImGui::SameLine();
+  if(ImGui::BeginCombo(label("").c_str(), label_))
   {
     for(size_t i = 0; i < values_.size(); ++i)
     {
       if(ImGui::Selectable(values_[i].c_str(), idx_ == i))
       {
         idx_ = i;
+        locked_ = true;
         value_ = values_[i];
       }
       if(idx_ == i)
@@ -125,7 +147,8 @@ DataComboInput::DataComboInput(const ::mc_rtc::imgui::Widget & parent,
 
 void DataComboInput::draw_()
 {
-  auto getValue = [&](const std::string & value) {
+  auto getValue = [&](const std::string & value)
+  {
     auto * form_ptr = dynamic_cast<const Form *>(&parent_);
     if(form_ptr)
     {
@@ -140,7 +163,8 @@ void DataComboInput::draw_()
   };
   auto data = parent_.client.data();
   std::string label;
-  auto resolve = [&]() -> std::vector<std::string> {
+  auto resolve = [&]() -> std::vector<std::string>
+  {
     for(size_t i = 0; i < ref_.size(); ++i)
     {
       std::string ref = ref_[i];
@@ -152,6 +176,7 @@ void DataComboInput::draw_()
       {
         if(ref_[i].size() && ref_[i][0] == '$')
         {
+          locked_ = false;
           label = fmt::format("Fill {} first", ref_[i].substr(1));
         }
         else

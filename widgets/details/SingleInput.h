@@ -36,11 +36,13 @@ struct SingleInput : public Widget
         busy_ = true;
         setupBuffer();
       }
+      ImGui::SameLine();
       fn("", std::forward<Args>(args)..., ImGuiInputTextFlags_ReadOnly);
     }
     else
     {
       bool clicked = ImGui::Button(label("Done").c_str());
+      ImGui::SameLine();
       fn(label("", "Input").c_str(), std::forward<Args>(args)..., ImGuiInputTextFlags_None);
       if(clicked
          || (ImGui::IsItemDeactivatedAfterEdit()

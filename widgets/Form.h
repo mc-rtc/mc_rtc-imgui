@@ -2,6 +2,7 @@
 
 #include "Widget.h"
 
+#include "IndentedSeparator.h"
 #include "form/widgets.h"
 
 namespace mc_rtc::imgui
@@ -42,19 +43,30 @@ struct Form : public Widget
 
   void draw2D()
   {
-    for(auto & w : requiredWidgets_)
+    auto drawWidgets = [](std::vector<form::WidgetPtr> & widgets)
     {
-      w->draw();
-    }
+      for(size_t i = 0; i < widgets.size(); ++i)
+      {
+        widgets[i]->draw();
+        if(i + 1 != widgets.size())
+        {
+          IndentedSeparator();
+        }
+      }
+    };
+    drawWidgets(requiredWidgets_);
     // FIXME Maybe always show if there is few optional elements?
     if(requiredWidgets_.size() == 0 || (otherWidgets_.size() && ImGui::CollapsingHeader(label("Optional").c_str())))
     {
-      ImGui::Indent();
-      for(auto & w : otherWidgets_)
+      if(requiredWidgets_.size() != 0)
       {
-        w->draw();
+        ImGui::Indent();
       }
-      ImGui::Unindent();
+      drawWidgets(otherWidgets_);
+      if(requiredWidgets_.size() != 0)
+      {
+        ImGui::Unindent();
+      }
     }
     if(ImGui::Button(label(id.name).c_str()))
     {
