@@ -27,8 +27,10 @@ struct SingleInput : public Widget
   template<typename ImGuiFn, typename... Args>
   void draw2D(ImGuiFn fn, Args &&... args)
   {
+    ImGui::BeginTable(label("", "Table").c_str(), 3, ImGuiTableFlags_SizingStretchProp);
+    ImGui::TableNextColumn();
     ImGui::Text("%s", id.name.c_str());
-    ImGui::SameLine();
+    ImGui::TableNextColumn();
     if(!busy_)
     {
       if(ImGui::Button(label("Edit").c_str()))
@@ -36,13 +38,13 @@ struct SingleInput : public Widget
         busy_ = true;
         setupBuffer();
       }
-      ImGui::SameLine();
+      ImGui::TableNextColumn();
       fn("", std::forward<Args>(args)..., ImGuiInputTextFlags_ReadOnly);
     }
     else
     {
       bool clicked = ImGui::Button(label("Done").c_str());
-      ImGui::SameLine();
+      ImGui::TableNextColumn();
       fn(label("", "Input").c_str(), std::forward<Args>(args)..., ImGuiInputTextFlags_None);
       if(clicked
          || (ImGui::IsItemDeactivatedAfterEdit()
@@ -58,6 +60,7 @@ struct SingleInput : public Widget
         busy_ = false;
       }
     }
+    ImGui::EndTable();
   }
 
 protected:
