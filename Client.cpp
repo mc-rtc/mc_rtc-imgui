@@ -371,4 +371,6 @@ void Client::plot_polygons(uint64_t id,
 
 void Client::end_plot(uint64_t) {}
 
+InteractiveMarker::~InteractiveMarker() {}
+
 } // namespace mc_rtc::imgui

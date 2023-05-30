@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Category.h"
+#include "InteractiveMarker.h"
 #include "Plot.h"
 
 namespace mc_rtc::imgui
@@ -14,6 +15,10 @@ struct Client : public mc_control::ControllerClient
    * address
    */
   Client();
+
+  /** Creates a new interactive marker */
+  virtual InteractiveMarkerPtr make_marker(const sva::PTransformd & pose = sva::PTransformd::Identity(),
+                                           ControlAxis mask = ControlAxis::NONE) = 0;
 
   /** Update the client data from the latest server message */
   void update();

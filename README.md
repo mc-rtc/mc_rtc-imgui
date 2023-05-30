@@ -20,6 +20,8 @@ This project provides a base client for [mc_rtc](https://github.com/jrl-umi3218/
 
 You should use the files provided in your project directly (e.g. as a submodule) and derive from `mc_rtc::imgui::Client` to implement 3D elements.
 
+Furthermore, to fully support 3D elements in Form, your client implementation must provide an interactive marker implementation and a factory function must be implemented in your Client.
+
 The code supposes:
 - Dear ImGui context has been initialized when `mc_rtc::imgui::Client` is used
 - Dear ImGui headers are on the search path and you link with imgui library
