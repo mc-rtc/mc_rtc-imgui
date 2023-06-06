@@ -265,6 +265,15 @@ void Client::form_array_input(const ElementId & id,
   widget<Form>(id).widget<form::ArrayInput>(name, required, null_or_default(default_, user_default), fixed_size);
 }
 
+void Client::form_point3d_input(const ElementId & id,
+                                const std::string & name,
+                                bool required,
+                                const Eigen::Vector3d & default_,
+                                bool user_default)
+{
+  widget<Form>(id).widget<form::Point3DInput>(name, required, null_or_default(default_, user_default));
+}
+
 void Client::form_combo_input(const ElementId & id,
                               const std::string & name,
                               bool required,

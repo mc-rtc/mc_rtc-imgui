@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../Client.h"
 #include "../../Widget.h"
 
 #include <memory>
@@ -44,6 +45,8 @@ struct Widget
   }
 
   virtual void draw_() = 0;
+
+  virtual void draw3D() {}
 
   /** A form widget is trivial if it doesn't contain other widgets */
   inline virtual bool trivial() const
@@ -273,6 +276,60 @@ struct ArrayInput : public SimpleInput<Eigen::VectorXd>
 
 private:
   bool fixed_;
+};
+
+struct Point3DInput : public SimpleInput<Eigen::Vector3d>
+{
+  Point3DInput(const ::mc_rtc::imgui::Widget & parent,
+               const std::string & name,
+               const std::optional<Eigen::Vector3d> & default_)
+  : SimpleInput(parent, name, default_), marker_(parent.client.make_marker({default_.value_or(Eigen::Vector3d::Zero())},
+                                                                           ::mc_rtc::imgui::ControlAxis::TRANSLATION))
+  {
+  }
+
+  inline void draw_() override
+  {
+    ImGui::SameLine();
+    if(ImGui::Button(label(visible_ ? "Hide" : "Show").c_str()))
+    {
+      visible_ = !visible_;
+    }
+    ImGui::BeginTable(label("", "table").c_str(), temp_.size(), ImGuiTableFlags_SizingStretchProp);
+    for(size_t i = 0; i < 3; ++i)
+    {
+      ImGui::TableNextColumn();
+      if(ImGui::InputDouble(label("", fmt::format("{}", i)).c_str(), &temp_(i)))
+      {
+        value_ = temp_;
+        locked_ = true;
+      }
+    }
+    ImGui::EndTable();
+  }
+
+  inline void draw3D() override
+  {
+    if(visible_ && marker_)
+    {
+      if(marker_->draw())
+      {
+        locked_ = true;
+        temp_ = marker_->pose().translation();
+        value_ = temp_;
+      }
+    }
+  }
+
+  void update_(const std::optional<Eigen::Vector3d> & value)
+  {
+    SimpleInput<Eigen::Vector3d>::update_(value);
+    marker_->pose(temp_);
+  }
+
+private:
+  ::mc_rtc::imgui::InteractiveMarkerPtr marker_;
+  bool visible_ = false;
 };
 
 struct ComboInput : public SimpleInput<std::string>

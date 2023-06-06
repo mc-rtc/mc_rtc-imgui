@@ -120,6 +120,12 @@ protected:
                         bool fixed_size,
                         bool user_default) override;
 
+  void form_point3d_input(const ElementId & formId,
+                          const std::string & name,
+                          bool requried,
+                          const Eigen::Vector3d & default_,
+                          bool user_default) override;
+
   void form_combo_input(const ElementId & formId,
                         const std::string & name,
                         bool required,

@@ -41,7 +41,7 @@ struct Form : public Widget
     return (*it)->value();
   }
 
-  void draw2D()
+  void draw2D() override
   {
     auto drawWidgets = [](std::vector<form::WidgetPtr> & widgets)
     {
@@ -100,6 +100,18 @@ struct Form : public Widget
       {
         w->unlock();
       }
+    }
+  }
+
+  void draw3D() override
+  {
+    for(auto & w : requiredWidgets_)
+    {
+      w->draw3D();
+    }
+    for(auto & w : otherWidgets_)
+    {
+      w->draw3D();
     }
   }
 
