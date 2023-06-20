@@ -7,6 +7,13 @@
 namespace mc_rtc::imgui
 {
 
+namespace form
+{
+
+struct ObjectWidget;
+
+}
+
 struct Client : public mc_control::ControllerClient
 {
   /** Default constructor
@@ -41,6 +48,10 @@ struct Client : public mc_control::ControllerClient
   {
     bold_font_ = font;
   }
+
+  void enable_bold_font();
+
+  void disable_bold_font();
 
 protected:
   std::vector<char> buffer_ = std::vector<char>(65535);
@@ -126,6 +137,18 @@ protected:
                           const Eigen::Vector3d & default_,
                           bool user_default) override;
 
+  void form_rotation_input(const ElementId & formId,
+                           const std::string & name,
+                           bool requried,
+                           const sva::PTransformd & default_,
+                           bool user_default) override;
+
+  void form_transform_input(const ElementId & formId,
+                            const std::string & name,
+                            bool requried,
+                            const sva::PTransformd & default_,
+                            bool user_default) override;
+
   void form_combo_input(const ElementId & formId,
                         const std::string & name,
                         bool required,
@@ -138,6 +161,14 @@ protected:
                              bool required,
                              const std::vector<std::string> & ref,
                              bool send_index) override;
+
+  void start_form_object_input(const std::string & name, bool required) override;
+
+  void end_form_object_input() override;
+
+  void start_form_object_array_input(const std::string & name, bool required) override;
+
+  void end_form_object_array_input() override;
 
   void start_plot(uint64_t id, const std::string & title) override;
 
@@ -176,6 +207,9 @@ protected:
 
   /** Returns a category (creates it if it does not exist */
   Category & getCategory(const std::vector<std::string> & category);
+
+  /** Currently active form */
+  form::ObjectWidget * active_form_ = nullptr;
 
   /** Currently active plots */
   std::unordered_map<uint64_t, std::shared_ptr<Plot>> active_plots_;

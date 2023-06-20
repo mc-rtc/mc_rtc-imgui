@@ -11,127 +11,59 @@ namespace mc_rtc::imgui
 // FIXME Does not update if the form is changed between two calls
 struct Form : public Widget
 {
-  Form(Client & client, const ElementId & id) : Widget(client, id) {}
+  Form(Client & client, const ElementId & id)
+  : Widget(client, id), object_(std::make_unique<form::ObjectWidget>(*this, "", nullptr))
+  {
+  }
 
   template<typename WidgetT, typename... Args>
-  void widget(const std::string & name, bool required, Args &&... args)
+  form::ObjectWidget * widget(const std::string & name, bool required, Args &&... args)
   {
-    if(required)
+    auto out = object_->widget<WidgetT>(name, required, std::forward<Args>(args)...);
+    if constexpr(std::is_same_v<WidgetT, form::ObjectWidget>)
     {
-      widget<WidgetT>(name, requiredWidgets_, std::forward<Args>(args)...);
+      return out;
     }
     else
     {
-      widget<WidgetT>(name, otherWidgets_, std::forward<Args>(args)...);
+      return object_.get();
     }
   }
 
   inline std::string value(const std::string & name) const
   {
-    auto pred = [&](auto && w) { return w->fullName() == name; };
-    auto it = std::find_if(requiredWidgets_.begin(), requiredWidgets_.end(), pred);
-    if(it == requiredWidgets_.end())
-    {
-      it = std::find_if(otherWidgets_.begin(), otherWidgets_.end(), pred);
-      if(it == otherWidgets_.end())
-      {
-        return "";
-      }
-    }
-    return (*it)->value();
+    return object_->value(name);
   }
 
   void draw2D() override
   {
-    auto drawWidgets = [](std::vector<form::WidgetPtr> & widgets)
-    {
-      for(size_t i = 0; i < widgets.size(); ++i)
-      {
-        widgets[i]->draw();
-        if(i + 1 != widgets.size())
-        {
-          IndentedSeparator();
-        }
-      }
-    };
-    drawWidgets(requiredWidgets_);
-    // FIXME Maybe always show if there is few optional elements?
-    if(requiredWidgets_.size() == 0 || (otherWidgets_.size() && ImGui::CollapsingHeader(label("Optional").c_str())))
-    {
-      if(requiredWidgets_.size() != 0)
-      {
-        ImGui::Indent();
-      }
-      drawWidgets(otherWidgets_);
-      if(requiredWidgets_.size() != 0)
-      {
-        ImGui::Unindent();
-      }
-    }
+    object_->draw_();
     if(ImGui::Button(label(id.name).c_str()))
     {
-      for(auto & w : requiredWidgets_)
+      if(!object_->ready())
       {
-        if(!w->ready())
-        {
-          // FIXME SHOW A POPUP WITH ALL REQUESTED FIELDS MISSING
-          mc_rtc::log::critical("Form not ready");
-          return;
-        }
+        // FIXME SHOW A POPUP WITH ALL REQUESTED FIELDS MISSING
+        mc_rtc::log::critical("Form not ready");
+        return;
       }
       mc_rtc::Configuration data;
-      for(auto & w : requiredWidgets_)
-      {
-        w->collect(data);
-      }
-      for(auto & w : otherWidgets_)
-      {
-        if(w->ready())
-        {
-          w->collect(data);
-        }
-      }
+      object_->collect(data);
       client.send_request(id, data);
-      for(auto & w : requiredWidgets_)
-      {
-        w->unlock();
-      }
-      for(auto & w : otherWidgets_)
-      {
-        w->unlock();
-      }
     }
   }
 
   void draw3D() override
   {
-    for(auto & w : requiredWidgets_)
-    {
-      w->draw3D();
-    }
-    for(auto & w : otherWidgets_)
-    {
-      w->draw3D();
-    }
+    object_->draw3D();
+  }
+
+  inline form::ObjectWidget * parentForm() noexcept
+  {
+    return object_.get();
   }
 
 protected:
-  std::vector<form::WidgetPtr> requiredWidgets_;
-  std::vector<form::WidgetPtr> otherWidgets_;
-
-  template<typename WidgetT, typename... Args>
-  void widget(const std::string & name, std::vector<form::WidgetPtr> & widgets, Args &&... args)
-  {
-    auto it = std::find_if(widgets.begin(), widgets.end(), [&](const auto & w) { return w->fullName() == name; });
-    if(it == widgets.end())
-    {
-      widgets.push_back(std::make_unique<WidgetT>(*this, name, std::forward<Args>(args)...));
-    }
-    else
-    {
-      (*it)->template update<WidgetT>(std::forward<Args>(args)...);
-    }
-  }
+  form::ObjectWidgetPtr object_;
 };
 
 } // namespace mc_rtc::imgui

@@ -12,6 +12,11 @@ struct ArrayForm : public Widget
 {
   ArrayForm(const ::mc_rtc::imgui::Widget & parent, const std::string & name, const mc_rtc::Configuration & schema);
 
+  WidgetPtr clone(ObjectWidget *) const override
+  {
+    mc_rtc::log::error_and_throw("ArrayForm cannot be cloned");
+  }
+
   bool ready() override;
 
   void draw_() override;
@@ -43,6 +48,11 @@ struct ObjectForm : public Widget
              const std::string & name,
              const std::map<std::string, mc_rtc::Configuration> & properties,
              const std::vector<std::string> & required);
+
+  WidgetPtr clone(ObjectWidget *) const override
+  {
+    mc_rtc::log::error_and_throw("ObjectForm cannot be cloned");
+  }
 
   bool ready() override;
 
