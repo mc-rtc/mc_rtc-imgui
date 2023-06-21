@@ -11,8 +11,9 @@ namespace form
 {
 
 struct ObjectWidget;
+struct OneOfWidget;
 
-}
+} // namespace form
 
 struct Client : public mc_control::ControllerClient
 {
@@ -170,6 +171,10 @@ protected:
 
   void end_form_object_array_input() override;
 
+  void start_form_one_of_input(const std::string & name, bool required) override;
+
+  void end_form_one_of_input() override;
+
   void start_plot(uint64_t id, const std::string & title) override;
 
   void plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range) override;
@@ -210,6 +215,15 @@ protected:
 
   /** Currently active form */
   form::ObjectWidget * active_form_ = nullptr;
+
+  /** Throw if active_form is not set */
+  inline void require_active_form()
+  {
+    if(!active_form_)
+    {
+      mc_rtc::log::error_and_throw("No active form at this point");
+    }
+  }
 
   /** Currently active plots */
   std::unordered_map<uint64_t, std::shared_ptr<Plot>> active_plots_;

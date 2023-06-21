@@ -334,37 +334,37 @@ void Client::schema(const ElementId & id, const std::string & schema)
 
 void Client::start_form_object_input(const std::string & name, bool required)
 {
-  if(!active_form_)
-  {
-    mc_rtc::log::error_and_throw("start_form_objet_input without an active form should not happen");
-  }
+  require_active_form();
   active_form_ = active_form_->widget<form::ObjectWidget>(name, required, active_form_);
 }
 
 void Client::end_form_object_input()
 {
-  if(!active_form_)
-  {
-    mc_rtc::log::error_and_throw("end_form_objet_input without an active form should not happen");
-  }
+  require_active_form();
   active_form_ = active_form_->parentForm();
 }
 
 void Client::start_form_object_array_input(const std::string & name, bool required)
 {
-  if(!active_form_)
-  {
-    mc_rtc::log::error_and_throw("start_form_objet_input without an active form should not happen");
-  }
+  require_active_form();
   active_form_ = active_form_->widget<form::ObjectArrayWidget>(name, required, required, active_form_);
 }
 
 void Client::end_form_object_array_input()
 {
-  if(!active_form_)
-  {
-    mc_rtc::log::error_and_throw("end_form_objet_input without an active form should not happen");
-  }
+  require_active_form();
+  active_form_ = active_form_->parentForm();
+}
+
+void Client::start_form_one_of_input(const std::string & name, bool required)
+{
+  require_active_form();
+  active_form_ = active_form_->widget<form::OneOfWidget>(name, required, active_form_);
+}
+
+void Client::end_form_one_of_input()
+{
+  require_active_form();
   active_form_ = active_form_->parentForm();
 }
 

@@ -19,6 +19,9 @@ using WidgetPtr = std::unique_ptr<Widget>;
 struct ObjectWidget;
 using ObjectWidgetPtr = std::unique_ptr<ObjectWidget>;
 
+struct OneOfWidget;
+using OneOfWidgetPtr = std::unique_ptr<OneOfWidget>;
+
 struct Widget
 {
   Widget(const ::mc_rtc::imgui::Widget & parent, const std::string & name)
@@ -61,16 +64,7 @@ struct Widget
         locked_ = false;
       }
     }
-    if(!trivial())
-    {
-      IndentedSeparator();
-      ImGui::Indent();
-    }
     draw_();
-    if(!trivial())
-    {
-      ImGui::Unindent();
-    }
   }
 
   virtual void draw_() = 0;
@@ -140,8 +134,12 @@ protected:
 
 struct ObjectWidget : public Widget
 {
-  ObjectWidget(const ::mc_rtc::imgui::Widget & parent, const std::string & name, ObjectWidget * parentForm)
-  : Widget(parent, name), parentForm_(parentForm)
+  /** The requiredOnly parameter is used in the OneOf widget to make this act as a container */
+  ObjectWidget(const ::mc_rtc::imgui::Widget & parent,
+               const std::string & name,
+               ObjectWidget * parentForm,
+               bool requiredOnly = false)
+  : Widget(parent, name), parentForm_(parentForm), requiredOnly_(requiredOnly)
   {
   }
 
@@ -152,7 +150,7 @@ struct ObjectWidget : public Widget
 
   ObjectWidgetPtr clone_object(ObjectWidget * parent) const
   {
-    auto out = std::make_unique<ObjectWidget>(parent_, name_, parent);
+    auto out = std::make_unique<ObjectWidget>(parent_, name_, parent, requiredOnly_);
     auto clone_widgets = [&out](const std::vector<WidgetPtr> & widgets_in, std::vector<WidgetPtr> & widgets_out)
     {
       for(const auto & w : widgets_in)
@@ -172,6 +170,11 @@ struct ObjectWidget : public Widget
 
   void draw_() override
   {
+    draw_(false);
+  }
+
+  void draw_(bool is_root)
+  {
     auto drawWidgets = [](std::vector<form::WidgetPtr> & widgets)
     {
       for(size_t i = 0; i < widgets.size(); ++i)
@@ -183,6 +186,11 @@ struct ObjectWidget : public Widget
         }
       }
     };
+    if(!is_root)
+    {
+      IndentedSeparator();
+      ImGui::Indent();
+    }
     drawWidgets(requiredWidgets_);
     // FIXME Maybe always show if there is few optional elements?
     if(requiredWidgets_.size() == 0 || (otherWidgets_.size() && ImGui::CollapsingHeader(label("Optional").c_str())))
@@ -196,6 +204,10 @@ struct ObjectWidget : public Widget
       {
         ImGui::Unindent();
       }
+    }
+    if(!is_root)
+    {
+      ImGui::Unindent();
     }
   }
 
@@ -243,7 +255,7 @@ struct ObjectWidget : public Widget
   template<typename WidgetT, typename... Args>
   ObjectWidget * widget(const std::string & name, bool required, Args &&... args)
   {
-    if(required)
+    if(required || requiredOnly_)
     {
       return widget<WidgetT>(name, requiredWidgets_, std::forward<Args>(args)...);
     }
@@ -275,8 +287,15 @@ struct ObjectWidget : public Widget
     return (*it)->value();
   }
 
+  /** Returns all widgets in the object */
+  inline const std::vector<form::WidgetPtr> & widgets() const noexcept
+  {
+    return requiredWidgets_;
+  }
+
 protected:
   ObjectWidget * parentForm_ = nullptr;
+  bool requiredOnly_ = false;
   std::vector<form::WidgetPtr> requiredWidgets_;
   std::vector<form::WidgetPtr> otherWidgets_;
 
@@ -322,20 +341,20 @@ struct ObjectArrayWidget : public Widget
 
   void draw_() override
   {
+    IndentedSeparator();
+    ImGui::Indent();
     std::vector<size_t> to_delete;
     for(size_t i = 0; i < objects_.size(); ++i)
     {
       parent_.client.enable_bold_font();
       ImGui::Text("[%zu]", i);
+      ImGui::SameLine();
       if(ImGui::Button(label("-", i).c_str()))
       {
         to_delete.push_back(i);
       }
       parent_.client.disable_bold_font();
-      IndentedSeparator();
-      ImGui::Indent();
       objects_[i]->draw_();
-      ImGui::Unindent();
     }
     for(size_t i = to_delete.size(); i > 0; --i)
     {
@@ -346,6 +365,7 @@ struct ObjectArrayWidget : public Widget
     {
       objects_.push_back(primaryForm_->clone_object(nullptr));
     }
+    ImGui::Unindent();
   }
 
   void draw3D() override
@@ -384,6 +404,98 @@ protected:
   bool required_;
   ObjectWidgetPtr primaryForm_;
   std::vector<ObjectWidgetPtr> objects_;
+};
+
+struct OneOfWidget : public Widget
+{
+  OneOfWidget(const ::mc_rtc::imgui::Widget & parent, const std::string & name, ObjectWidget * parentForm)
+  : OneOfWidget(parent, name, std::make_unique<ObjectWidget>(parent, name, parentForm, true))
+  {
+  }
+
+  OneOfWidget(const ::mc_rtc::imgui::Widget & parent, const std::string & name, ObjectWidgetPtr primary)
+  : Widget(parent, name), container_(std::move(primary))
+  {
+  }
+
+  WidgetPtr clone(ObjectWidget * parent) const override
+  {
+    return std::make_unique<OneOfWidget>(parent_, name_, container_->clone_object(parent));
+  }
+
+  bool ready() override
+  {
+    return active_ && active_->ready();
+  }
+
+  void draw_() override
+  {
+    ImGui::SameLine();
+    if(ImGui::BeginCombo(label("").c_str(), active_ ? active_->name().c_str() : ""))
+    {
+      if(ImGui::Selectable(label("", "selectable").c_str(), !active_))
+      {
+        active_.reset();
+      }
+      for(const auto & w : container_->widgets())
+      {
+        bool selected = active_ && active_->name() == w->name();
+        if(ImGui::Selectable(label(w->name()).c_str(), selected))
+        {
+          if(!active_ || active_->name() != w->name())
+          {
+            active_ = w->clone(nullptr);
+          }
+        }
+        if(active_ && active_->name() == w->name())
+        {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+    if(!active_)
+    {
+      return;
+    }
+    IndentedSeparator();
+    ImGui::Spacing();
+    ImGui::Indent();
+    active_->draw_();
+    ImGui::Unindent();
+  }
+
+  void draw3D() override
+  {
+    if(active_)
+    {
+      active_->draw3D();
+    }
+  }
+
+  bool trivial() const override
+  {
+    return false;
+  }
+
+  void collect(mc_rtc::Configuration & out_) override
+  {
+    assert(active_);
+    auto out = out_.add(name_);
+    active_->collect(out);
+    active_.reset();
+  }
+
+  void update_(ObjectWidget * /*parent*/) {}
+
+  inline ObjectWidget * container() noexcept
+  {
+    return container_.get();
+  }
+
+private:
+  ObjectWidgetPtr container_;
+  WidgetPtr active_;
 };
 
 template<typename DataT>
@@ -852,6 +964,10 @@ ObjectWidget * ObjectWidget::widget(const std::string & name, std::vector<form::
   else if constexpr(std::is_same_v<WidgetT, ObjectArrayWidget>)
   {
     return static_cast<ObjectArrayWidget *>(it->get())->primary();
+  }
+  else if constexpr(std::is_same_v<WidgetT, OneOfWidget>)
+  {
+    return static_cast<OneOfWidget *>(it->get())->container();
   }
   else
   {

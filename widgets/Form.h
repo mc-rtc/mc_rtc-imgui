@@ -37,7 +37,7 @@ struct Form : public Widget
 
   void draw2D() override
   {
-    object_->draw_();
+    object_->draw_(true);
     if(ImGui::Button(label(id.name).c_str()))
     {
       if(!object_->ready())
