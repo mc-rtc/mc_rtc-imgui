@@ -406,6 +406,42 @@ protected:
   std::vector<ObjectWidgetPtr> objects_;
 };
 
+struct GenericArrayWidget : public ObjectArrayWidget
+{
+  GenericArrayWidget(const ::mc_rtc::imgui::Widget & parent,
+                     const std::string & name,
+                     bool required,
+                     ObjectWidget * parentForm)
+  : GenericArrayWidget(parent, name, required, std::make_unique<ObjectWidget>(parent, name, parentForm, true))
+  {
+  }
+
+  GenericArrayWidget(const ::mc_rtc::imgui::Widget & parent,
+                     const std::string & name,
+                     bool required,
+                     ObjectWidgetPtr primary)
+  : ObjectArrayWidget(parent, name, required, std::move(primary))
+  {
+  }
+
+  WidgetPtr clone(ObjectWidget * parent) const override
+  {
+    return std::make_unique<GenericArrayWidget>(parent_, name_, required_, primaryForm_->clone_object(parent));
+  }
+
+  void collect(mc_rtc::Configuration & out_) override
+  {
+    mc_rtc::Configuration out = out_.array(name_);
+    for(auto & o : objects_)
+    {
+      mc_rtc::Configuration c;
+      o->collect(c);
+      out.push(c(o->widgets()[0]->name()));
+    }
+    objects_.clear();
+  }
+};
+
 struct OneOfWidget : public Widget
 {
   OneOfWidget(const ::mc_rtc::imgui::Widget & parent, const std::string & name, ObjectWidget * parentForm)
@@ -964,6 +1000,10 @@ ObjectWidget * ObjectWidget::widget(const std::string & name, std::vector<form::
   else if constexpr(std::is_same_v<WidgetT, ObjectArrayWidget>)
   {
     return static_cast<ObjectArrayWidget *>(it->get())->primary();
+  }
+  else if constexpr(std::is_same_v<WidgetT, GenericArrayWidget>)
+  {
+    return static_cast<GenericArrayWidget *>(it->get())->primary();
   }
   else if constexpr(std::is_same_v<WidgetT, OneOfWidget>)
   {
