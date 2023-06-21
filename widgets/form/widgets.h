@@ -561,7 +561,18 @@ struct SimpleInput : public Widget
       }
       else
       {
-        temp_ = {};
+        if constexpr(std::is_same_v<DataT, sva::PTransformd>)
+        {
+          temp_ = sva::PTransformd::Identity();
+        }
+        else if constexpr(std::is_same_v<DataT, Eigen::Vector3d>)
+        {
+          temp_ = Eigen::Vector3d::Zero();
+        }
+        else
+        {
+          temp_ = {};
+        }
       }
     }
   }
@@ -781,10 +792,18 @@ struct InteractiveMarkerInput : public SimpleInput<DataT>
         if constexpr(std::is_same_v<DataT, Eigen::Vector3d>)
         {
           this->value_ = data;
+          if(marker_)
+          {
+            marker_->pose({data});
+          }
         }
         else
         {
           this->value_.value().translation() = data;
+          if(marker_)
+          {
+            marker_->pose(data);
+          }
         }
         this->locked_ = true;
       }
@@ -828,6 +847,10 @@ struct InteractiveMarkerInput : public SimpleInput<DataT>
       {
         this->temp_.rotation() = quat.toRotationMatrix();
         this->value_ = this->temp_;
+        if(marker_)
+        {
+          marker_->pose(this->temp_);
+        }
         this->locked_ = true;
       }
     }
