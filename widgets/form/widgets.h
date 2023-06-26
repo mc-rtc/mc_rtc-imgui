@@ -51,6 +51,11 @@ struct Widget
     locked_ = false;
   }
 
+  inline bool locked() const noexcept
+  {
+    return locked_;
+  }
+
   void draw()
   {
     parent_.client.enable_bold_font();
@@ -122,14 +127,16 @@ struct Widget
     static_cast<Derived *>(this)->update_(std::forward<Args>(args)...);
   }
 
+  virtual void update(const mc_rtc::Configuration &) = 0;
+
 protected:
   const ::mc_rtc::imgui::Widget & parent_;
   std::string name_;
-  bool locked_ = false;
 
   /** Unique id to further disambiguate labels */
   uint64_t id_ = 0;
   inline static uint64_t next_id_ = 0;
+  bool locked_ = false;
 };
 
 struct ObjectWidget : public Widget
@@ -175,11 +182,12 @@ struct ObjectWidget : public Widget
 
   void draw_(bool is_root)
   {
-    auto drawWidgets = [](std::vector<form::WidgetPtr> & widgets)
+    auto drawWidgets = [this](std::vector<form::WidgetPtr> & widgets)
     {
       for(size_t i = 0; i < widgets.size(); ++i)
       {
         widgets[i]->draw();
+        locked_ = locked_ || widgets[i]->locked();
         if(i + 1 != widgets.size())
         {
           IndentedSeparator();
@@ -248,9 +256,31 @@ struct ObjectWidget : public Widget
         w->unlock();
       }
     }
+    locked_ = false;
   }
 
   void update_(ObjectWidget * /*parent*/) {}
+
+  void update(const mc_rtc::Configuration & config) override
+  {
+    if(locked_)
+    {
+      return;
+    }
+    std::map<std::string, mc_rtc::Configuration> values = config;
+    for(auto & w : requiredWidgets_)
+    {
+      w->update(values.at(w->name()));
+    }
+    for(auto & w : otherWidgets_)
+    {
+      auto it = values.find(w->name());
+      if(it != values.end())
+      {
+        w->update(it->second);
+      }
+    }
+  }
 
   template<typename WidgetT, typename... Args>
   ObjectWidget * widget(const std::string & name, bool required, Args &&... args)
@@ -351,10 +381,12 @@ struct ObjectArrayWidget : public Widget
       ImGui::SameLine();
       if(ImGui::Button(label("-", i).c_str()))
       {
+        locked_ = true;
         to_delete.push_back(i);
       }
       parent_.client.disable_bold_font();
       objects_[i]->draw_();
+      locked_ = locked_ || objects_[i]->locked();
     }
     for(size_t i = to_delete.size(); i > 0; --i)
     {
@@ -363,6 +395,7 @@ struct ObjectArrayWidget : public Widget
     IndentedSeparator();
     if(ImGui::Button(label("+").c_str()))
     {
+      locked_ = true;
       objects_.push_back(primaryForm_->clone_object(nullptr));
     }
     ImGui::Unindent();
@@ -391,9 +424,33 @@ struct ObjectArrayWidget : public Widget
       out.push(c);
     }
     objects_.clear();
+    locked_ = false;
   }
 
   void update_(bool /*required*/, ObjectWidget * /*parent*/) {}
+
+  void update(const mc_rtc::Configuration & data_) override
+  {
+    update(data_.operator std::vector<mc_rtc::Configuration>());
+  }
+
+  virtual void update(const std::vector<mc_rtc::Configuration> & data)
+  {
+    if(locked_)
+    {
+      return;
+    }
+    objects_.resize(data.size());
+    for(size_t i = 0; i < objects_.size(); ++i)
+    {
+      auto & o = objects_[i];
+      if(!o || !o->locked())
+      {
+        o = primaryForm_->clone_object(nullptr);
+      }
+      o->update(data[i]);
+    }
+  }
 
   inline ObjectWidget * primary() noexcept
   {
@@ -411,22 +468,25 @@ struct GenericArrayWidget : public ObjectArrayWidget
   GenericArrayWidget(const ::mc_rtc::imgui::Widget & parent,
                      const std::string & name,
                      bool required,
-                     ObjectWidget * parentForm)
-  : GenericArrayWidget(parent, name, required, std::make_unique<ObjectWidget>(parent, name, parentForm, true))
+                     ObjectWidget * parentForm,
+                     const std::optional<std::vector<mc_rtc::Configuration>> & data)
+  : GenericArrayWidget(parent, name, required, std::make_unique<ObjectWidget>(parent, name, parentForm, true), data)
   {
   }
 
   GenericArrayWidget(const ::mc_rtc::imgui::Widget & parent,
                      const std::string & name,
                      bool required,
-                     ObjectWidgetPtr primary)
+                     ObjectWidgetPtr primary,
+                     const std::optional<std::vector<mc_rtc::Configuration>> & data)
   : ObjectArrayWidget(parent, name, required, std::move(primary))
   {
+    update_(required, primary.get(), data);
   }
 
   WidgetPtr clone(ObjectWidget * parent) const override
   {
-    return std::make_unique<GenericArrayWidget>(parent_, name_, required_, primaryForm_->clone_object(parent));
+    return std::make_unique<GenericArrayWidget>(parent_, name_, required_, primaryForm_->clone_object(parent), data_);
   }
 
   void collect(mc_rtc::Configuration & out_) override
@@ -439,7 +499,49 @@ struct GenericArrayWidget : public ObjectArrayWidget
       out.push(c(o->widgets()[0]->name()));
     }
     objects_.clear();
+    locked_ = false;
   }
+
+  void update_(bool /*required*/,
+               ObjectWidget * /*parent*/,
+               const std::optional<std::vector<mc_rtc::Configuration>> & data)
+  {
+    if(locked_)
+    {
+      return;
+    }
+    data_ = data;
+    if(data)
+    {
+      update(*data);
+    }
+  }
+
+  using ObjectArrayWidget::update;
+
+  void update(const std::vector<mc_rtc::Configuration> & data) override
+  {
+    if(locked_)
+    {
+      return;
+    }
+    objects_.resize(data.size());
+    for(size_t i = 0; i < objects_.size(); ++i)
+    {
+      auto & o = objects_[i];
+      if(!o || o->widgets().size() == 0)
+      {
+        o = primaryForm_->clone_object(nullptr);
+      }
+      if(o->widgets().size())
+      {
+        o->widgets()[0]->update(data[i]);
+      }
+    }
+  }
+
+protected:
+  std::optional<std::vector<mc_rtc::Configuration>> data_ = std::nullopt;
 };
 
 struct OneOfWidget : public Widget
@@ -471,6 +573,7 @@ struct OneOfWidget : public Widget
     {
       if(ImGui::Selectable(label("", "selectable").c_str(), !active_))
       {
+        locked_ = true;
         active_.reset();
       }
       for(const auto & w : container_->widgets())
@@ -480,6 +583,7 @@ struct OneOfWidget : public Widget
         {
           if(!active_ || active_->name() != w->name())
           {
+            locked_ = true;
             active_ = w->clone(nullptr);
           }
         }
@@ -498,6 +602,7 @@ struct OneOfWidget : public Widget
     ImGui::Spacing();
     ImGui::Indent();
     active_->draw_();
+    locked_ = locked_ || active_->locked();
     ImGui::Unindent();
   }
 
@@ -523,6 +628,36 @@ struct OneOfWidget : public Widget
   }
 
   void update_(ObjectWidget * /*parent*/) {}
+
+  void update(const mc_rtc::Configuration & data_) override
+  {
+    if(locked_)
+    {
+      return;
+    }
+    std::map<std::string, mc_rtc::Configuration> data = data_;
+    if(data.size() == 0)
+    {
+      if(active_)
+      {
+        active_.reset();
+      }
+      return;
+    }
+    const auto & w_name = data.begin()->first;
+    const auto & w_data = data.begin()->second;
+    if(!active_ || active_->name() != w_name)
+    {
+      const auto & widgets = container_->widgets();
+      auto it = std::find_if(widgets.begin(), widgets.end(), [&w_name](const auto & w) { return w->name() == w_name; });
+      if(it == widgets.end())
+      {
+        return;
+      }
+      active_ = it->get()->clone(nullptr);
+    }
+    active_->update(w_data);
+  }
 
   inline ObjectWidget * container() noexcept
   {
@@ -622,6 +757,15 @@ struct SimpleInput : public Widget
     {
       temp_ = value_.value();
     }
+  }
+
+  void update(const mc_rtc::Configuration & data) override
+  {
+    if(locked_)
+    {
+      return;
+    }
+    update_(data.operator DataT());
   }
 
 protected:
@@ -976,6 +1120,8 @@ struct ComboInput : public SimpleInput<std::string>
   }
 
   void update_(const std::vector<std::string> & values, bool send_index, int user_default = -1);
+
+  void update(const mc_rtc::Configuration & data) override;
 
 protected:
   std::vector<std::string> values_;

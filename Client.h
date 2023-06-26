@@ -167,7 +167,9 @@ protected:
 
   void end_form_object_input() override;
 
-  void start_form_generic_array_input(const std::string & name, bool required) override;
+  void start_form_generic_array_input(const std::string & name,
+                                      bool required,
+                                      std::optional<std::vector<mc_rtc::Configuration>> data) override;
 
   void end_form_generic_array_input() override;
 

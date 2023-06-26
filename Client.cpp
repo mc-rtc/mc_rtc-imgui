@@ -356,10 +356,12 @@ void Client::end_form_object_array_input()
   active_form_ = active_form_->parentForm();
 }
 
-void Client::start_form_generic_array_input(const std::string & name, bool required)
+void Client::start_form_generic_array_input(const std::string & name,
+                                            bool required,
+                                            std::optional<std::vector<mc_rtc::Configuration>> data)
 {
   require_active_form();
-  active_form_ = active_form_->widget<form::GenericArrayWidget>(name, required, required, active_form_);
+  active_form_ = active_form_->widget<form::GenericArrayWidget>(name, required, required, active_form_, data);
 }
 
 void Client::end_form_generic_array_input()

@@ -105,6 +105,26 @@ void ComboInput::update_(const std::vector<std::string> & values, bool send_inde
   }
 }
 
+void ComboInput::update(const mc_rtc::Configuration & data_)
+{
+  if(locked_)
+  {
+    return;
+  }
+  std::string data = data_;
+  auto it = std::find(values_.begin(), values_.end(), data);
+  if(it != values_.end())
+  {
+    value_ = data;
+    idx_ = std::distance(values_.begin(), it);
+  }
+  else
+  {
+    value_ = "";
+    idx_ = values_.size();
+  }
+}
+
 void ComboInput::draw_()
 {
   const char * label = idx_ < values_.size() ? values_[idx_].c_str() : "";

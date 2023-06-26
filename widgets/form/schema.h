@@ -17,6 +17,11 @@ struct ArrayForm : public Widget
     mc_rtc::log::error_and_throw("ArrayForm cannot be cloned");
   }
 
+  void update(const mc_rtc::Configuration &) override
+  {
+    mc_rtc::log::error_and_throw("Not updated for ArrayForm");
+  }
+
   bool ready() override;
 
   void draw_() override;
@@ -52,6 +57,11 @@ struct ObjectForm : public Widget
   WidgetPtr clone(ObjectWidget *) const override
   {
     mc_rtc::log::error_and_throw("ObjectForm cannot be cloned");
+  }
+
+  void update(const mc_rtc::Configuration &) override
+  {
+    mc_rtc::log::error_and_throw("Not updated for ArrayForm");
   }
 
   bool ready() override;
