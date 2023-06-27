@@ -285,27 +285,30 @@ void Client::form_point3d_input(const ElementId & /*id*/,
                                 const std::string & name,
                                 bool required,
                                 const Eigen::Vector3d & default_,
-                                bool user_default)
+                                bool user_default,
+                                bool interactive)
 {
-  active_form_->widget<form::Point3DInput>(name, required, null_or_default(default_, user_default));
+  active_form_->widget<form::Point3DInput>(name, required, null_or_default(default_, user_default), interactive);
 }
 
 void Client::form_rotation_input(const ElementId & /*id*/,
                                  const std::string & name,
                                  bool required,
                                  const sva::PTransformd & default_,
-                                 bool user_default)
+                                 bool user_default,
+                                 bool interactive)
 {
-  active_form_->widget<form::RotationInput>(name, required, null_or_default(default_, user_default));
+  active_form_->widget<form::RotationInput>(name, required, null_or_default(default_, user_default), interactive);
 }
 
 void Client::form_transform_input(const ElementId & /*id*/,
                                   const std::string & name,
                                   bool required,
                                   const sva::PTransformd & default_,
-                                  bool user_default)
+                                  bool user_default,
+                                  bool interactive)
 {
-  active_form_->widget<form::TransformInput>(name, required, null_or_default(default_, user_default));
+  active_form_->widget<form::TransformInput>(name, required, null_or_default(default_, user_default), interactive);
 }
 
 void Client::form_combo_input(const ElementId & /*id*/,

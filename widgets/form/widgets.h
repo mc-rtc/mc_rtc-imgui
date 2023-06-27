@@ -905,13 +905,19 @@ struct InteractiveMarkerInput : public SimpleInput<DataT>
 {
   InteractiveMarkerInput(const ::mc_rtc::imgui::Widget & parent,
                          const std::string & name,
-                         const std::optional<DataT> & default_)
-  : SimpleInput<DataT>(parent, name, default_), marker_(parent.client.make_marker(value_or(default_), axis))
+                         const std::optional<DataT> & default_,
+                         bool interactive)
+  : SimpleInput<DataT>(parent, name, default_), marker_(parent.client.make_marker(value_or(default_), axis)),
+    interactive_(interactive)
   {
   }
 
   inline void draw_() override
   {
+    if(!interactive_)
+    {
+      return;
+    }
     ImGui::SameLine();
     if(ImGui::Button(this->label(visible_ ? "Hide" : "Show").c_str()))
     {
@@ -1003,6 +1009,10 @@ struct InteractiveMarkerInput : public SimpleInput<DataT>
 
   inline void draw3D() override
   {
+    if(!interactive_)
+    {
+      return;
+    }
     if(visible_ && marker_)
     {
       if(marker_->draw())
@@ -1022,14 +1032,16 @@ struct InteractiveMarkerInput : public SimpleInput<DataT>
     }
   }
 
-  void update_(const std::optional<DataT> & value)
+  void update_(const std::optional<DataT> & value, bool interactive)
   {
     SimpleInput<DataT>::update_(value);
+    interactive_ = interactive;
     marker_->pose(this->temp_);
   }
 
-private:
+protected:
   ::mc_rtc::imgui::InteractiveMarkerPtr marker_;
+  bool interactive_;
   bool visible_ = false;
 };
 
@@ -1040,7 +1052,7 @@ struct Point3DInput : public InteractiveMarkerInput<Eigen::Vector3d, ::mc_rtc::i
 
   WidgetPtr clone(ObjectWidget *) const override
   {
-    return std::make_unique<Point3DInput>(parent_, name_, value_);
+    return std::make_unique<Point3DInput>(parent_, name_, value_, interactive_);
   }
 
   inline void draw_() override
@@ -1057,7 +1069,7 @@ struct RotationInput : public InteractiveMarkerInput<sva::PTransformd, ::mc_rtc:
 
   WidgetPtr clone(ObjectWidget *) const override
   {
-    return std::make_unique<RotationInput>(parent_, name_, value_);
+    return std::make_unique<RotationInput>(parent_, name_, value_, interactive_);
   }
 
   inline void draw_() override
@@ -1080,7 +1092,7 @@ struct TransformInput : public InteractiveMarkerInput<sva::PTransformd, ::mc_rtc
 
   WidgetPtr clone(ObjectWidget *) const override
   {
-    return std::make_unique<TransformInput>(parent_, name_, value_);
+    return std::make_unique<TransformInput>(parent_, name_, value_, interactive_);
   }
 
   inline void draw_() override

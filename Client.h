@@ -136,19 +136,22 @@ protected:
                           const std::string & name,
                           bool requried,
                           const Eigen::Vector3d & default_,
-                          bool user_default) override;
+                          bool user_default,
+                          bool interactive) override;
 
   void form_rotation_input(const ElementId & formId,
                            const std::string & name,
                            bool requried,
                            const sva::PTransformd & default_,
-                           bool user_default) override;
+                           bool user_default,
+                           bool interactive) override;
 
   void form_transform_input(const ElementId & formId,
                             const std::string & name,
                             bool requried,
                             const sva::PTransformd & default_,
-                            bool user_default) override;
+                            bool user_default,
+                            bool interactive) override;
 
   void form_combo_input(const ElementId & formId,
                         const std::string & name,
