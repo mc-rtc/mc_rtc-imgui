@@ -180,7 +180,9 @@ protected:
 
   void end_form_object_array_input() override;
 
-  void start_form_one_of_input(const std::string & name, bool required) override;
+  void start_form_one_of_input(const std::string & name,
+                               bool required,
+                               const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data) override;
 
   void end_form_one_of_input() override;
 

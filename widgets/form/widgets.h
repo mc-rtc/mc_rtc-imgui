@@ -546,19 +546,25 @@ protected:
 
 struct OneOfWidget : public Widget
 {
-  OneOfWidget(const ::mc_rtc::imgui::Widget & parent, const std::string & name, ObjectWidget * parentForm)
-  : OneOfWidget(parent, name, std::make_unique<ObjectWidget>(parent, name, parentForm, true))
+  OneOfWidget(const ::mc_rtc::imgui::Widget & parent,
+              const std::string & name,
+              ObjectWidget * parentForm,
+              const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data)
+  : OneOfWidget(parent, name, std::make_unique<ObjectWidget>(parent, name, parentForm, true), data)
   {
   }
 
-  OneOfWidget(const ::mc_rtc::imgui::Widget & parent, const std::string & name, ObjectWidgetPtr primary)
-  : Widget(parent, name), container_(std::move(primary))
+  OneOfWidget(const ::mc_rtc::imgui::Widget & parent,
+              const std::string & name,
+              ObjectWidgetPtr primary,
+              const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data)
+  : Widget(parent, name), container_(std::move(primary)), data_(data)
   {
   }
 
   WidgetPtr clone(ObjectWidget * parent) const override
   {
-    return std::make_unique<OneOfWidget>(parent_, name_, container_->clone_object(parent));
+    return std::make_unique<OneOfWidget>(parent_, name_, container_->clone_object(parent), data_);
   }
 
   bool ready() override
@@ -574,10 +580,12 @@ struct OneOfWidget : public Widget
       if(ImGui::Selectable(label("", "selectable").c_str(), !active_))
       {
         locked_ = true;
+        active_idx_ = std::numeric_limits<size_t>::max();
         active_.reset();
       }
-      for(const auto & w : container_->widgets())
+      for(size_t i = 0; i < container_->widgets().size(); ++i)
       {
+        auto & w = container_->widgets()[i];
         bool selected = active_ && active_->name() == w->name();
         if(ImGui::Selectable(label(w->name()).c_str(), selected))
         {
@@ -585,6 +593,7 @@ struct OneOfWidget : public Widget
           {
             locked_ = true;
             active_ = w->clone(nullptr);
+            active_idx_ = i;
           }
         }
         if(active_ && active_->name() == w->name())
@@ -622,41 +631,46 @@ struct OneOfWidget : public Widget
   void collect(mc_rtc::Configuration & out_) override
   {
     assert(active_);
-    auto out = out_.add(name_);
-    active_->collect(out);
+    auto out = out_.array(name_, 2);
+    out.push(active_idx_);
+    Configuration object_out;
+    active_->collect(object_out);
+    out.push(object_out(active_->name()));
+    locked_ = false;
+    active_idx_ = std::numeric_limits<size_t>::max();
     active_.reset();
   }
 
-  void update_(ObjectWidget * /*parent*/) {}
+  void update_(ObjectWidget * /*parent*/, const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data)
+  {
+    if(data)
+    {
+      update(*data);
+    }
+  }
 
-  void update(const mc_rtc::Configuration & data_) override
+  void update(const std::pair<size_t, mc_rtc::Configuration> & data)
   {
     if(locked_)
     {
       return;
     }
-    std::map<std::string, mc_rtc::Configuration> data = data_;
-    if(data.size() == 0)
+    data_ = data;
+    if(data.first >= container_->widgets().size())
     {
-      if(active_)
-      {
-        active_.reset();
-      }
       return;
     }
-    const auto & w_name = data.begin()->first;
-    const auto & w_data = data.begin()->second;
-    if(!active_ || active_->name() != w_name)
+    if(data.first != active_idx_)
     {
-      const auto & widgets = container_->widgets();
-      auto it = std::find_if(widgets.begin(), widgets.end(), [&w_name](const auto & w) { return w->name() == w_name; });
-      if(it == widgets.end())
-      {
-        return;
-      }
-      active_ = it->get()->clone(nullptr);
+      active_idx_ = data.first;
+      active_ = container_->widgets()[active_idx_]->clone(nullptr);
     }
-    active_->update(w_data);
+    active_->update(data.second);
+  }
+
+  void update(const mc_rtc::Configuration & data_) override
+  {
+    update(data_.operator std::pair<size_t, mc_rtc::Configuration>());
   }
 
   inline ObjectWidget * container() noexcept
@@ -667,6 +681,8 @@ struct OneOfWidget : public Widget
 private:
   ObjectWidgetPtr container_;
   WidgetPtr active_;
+  size_t active_idx_ = std::numeric_limits<size_t>::max();
+  std::optional<std::pair<size_t, mc_rtc::Configuration>> data_;
 };
 
 template<typename DataT>

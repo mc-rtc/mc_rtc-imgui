@@ -373,10 +373,12 @@ void Client::end_form_generic_array_input()
   active_form_ = active_form_->parentForm();
 }
 
-void Client::start_form_one_of_input(const std::string & name, bool required)
+void Client::start_form_one_of_input(const std::string & name,
+                                     bool required,
+                                     const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data)
 {
   require_active_form();
-  active_form_ = active_form_->widget<form::OneOfWidget>(name, required, active_form_);
+  active_form_ = active_form_->widget<form::OneOfWidget>(name, required, active_form_, data);
 }
 
 void Client::end_form_one_of_input()
