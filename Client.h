@@ -128,6 +128,7 @@ protected:
   void form_array_input(const ElementId & formId,
                         const std::string & name,
                         bool required,
+                        const std::vector<std::string> & labels,
                         const Eigen::VectorXd & default_,
                         bool fixed_size,
                         bool user_default) override;

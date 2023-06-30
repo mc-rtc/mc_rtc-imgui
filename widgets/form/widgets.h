@@ -883,23 +883,26 @@ struct ArrayInput : public SimpleInput<Eigen::VectorXd>
 {
   ArrayInput(const ::mc_rtc::imgui::Widget & parent,
              const std::string & name,
+             const std::vector<std::string> & labels,
              const std::optional<Eigen::VectorXd> & default_,
              bool fixed_size);
 
   WidgetPtr clone(ObjectWidget *) const override
   {
-    return std::make_unique<ArrayInput>(parent_, name_, value_, fixed_);
+    return std::make_unique<ArrayInput>(parent_, name_, labels_, value_, fixed_);
   }
 
   void draw_() override;
 
-  inline void update_(const std::optional<Eigen::VectorXd> & value, bool fixed)
+  inline void update_(const std::vector<std::string> & labels, const std::optional<Eigen::VectorXd> & value, bool fixed)
   {
     SimpleInput<Eigen::VectorXd>::update_(value);
+    labels_ = labels;
     fixed_ = fixed;
   }
 
 private:
+  std::vector<std::string> labels_;
   bool fixed_;
 };
 

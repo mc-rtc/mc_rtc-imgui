@@ -11,9 +11,10 @@ namespace form
 
 ArrayInput::ArrayInput(const ::mc_rtc::imgui::Widget & parent,
                        const std::string & name,
+                       const std::vector<std::string> & labels,
                        const std::optional<Eigen::VectorXd> & default_,
                        bool fixed_size)
-: SimpleInput::SimpleInput(parent, name, default_), fixed_(fixed_size)
+: SimpleInput::SimpleInput(parent, name, default_), labels_(labels), fixed_(fixed_size)
 {
 }
 
@@ -23,12 +24,25 @@ void ArrayInput::draw_()
   if(table_layout)
   {
     ImGui::BeginTable(label("", "table").c_str(), temp_.size(), ImGuiTableFlags_SizingStretchProp);
+    if(labels_.size())
+    {
+      for(size_t i = 0; i < static_cast<size_t>(temp_.size()); ++i)
+      {
+        ImGui::TableNextColumn();
+        ImGui::Text("%s", i < labels_.size() ? labels_[i].c_str() : std::to_string(i).c_str());
+      }
+    }
   }
   for(size_t i = 0; i < static_cast<size_t>(temp_.size()); ++i)
   {
     if(table_layout)
     {
       ImGui::TableNextColumn();
+    }
+    else
+    {
+      ImGui::Text("%s", i < labels_.size() ? labels_[i].c_str() : std::to_string(i).c_str());
+      ImGui::SameLine();
     }
     if(ImGui::InputDouble(label("", fmt::format("{}", i)).c_str(), &temp_(i)))
     {
