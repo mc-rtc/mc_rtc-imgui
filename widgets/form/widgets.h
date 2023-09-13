@@ -41,20 +41,11 @@ struct Widget
 
   virtual bool ready() = 0;
 
-  inline void lock()
-  {
-    locked_ = true;
-  }
+  inline void lock() { locked_ = true; }
 
-  inline void unlock()
-  {
-    locked_ = false;
-  }
+  inline void unlock() { locked_ = false; }
 
-  inline bool locked() const noexcept
-  {
-    return locked_;
-  }
+  inline bool locked() const noexcept { return locked_; }
 
   void draw()
   {
@@ -64,10 +55,7 @@ struct Widget
     if(locked_)
     {
       ImGui::SameLine();
-      if(ImGui::Button(label("Reset").c_str()))
-      {
-        locked_ = false;
-      }
+      if(ImGui::Button(label("Reset").c_str())) { locked_ = false; }
     }
     draw_();
   }
@@ -77,10 +65,7 @@ struct Widget
   virtual void draw3D() {}
 
   /** A form widget is trivial if it doesn't contain other widgets */
-  inline virtual bool trivial() const
-  {
-    return true;
-  }
+  inline virtual bool trivial() const { return true; }
 
   inline virtual std::string value()
   {
@@ -98,32 +83,20 @@ struct Widget
   inline std::string name() const
   {
     size_t pos = name_.find("##");
-    if(pos != std::string::npos)
-    {
-      return name_.substr(0, pos);
-    }
+    if(pos != std::string::npos) { return name_.substr(0, pos); }
     return name_;
   }
 
-  inline const std::string & fullName() const
-  {
-    return name_;
-  }
+  inline const std::string & fullName() const { return name_; }
 
   bool required;
 
-  inline const ::mc_rtc::imgui::Widget & parent() const
-  {
-    return parent_;
-  }
+  inline const ::mc_rtc::imgui::Widget & parent() const { return parent_; }
 
   template<typename Derived, typename... Args>
   void update(Args &&... args)
   {
-    if(locked_)
-    {
-      return;
-    }
+    if(locked_) { return; }
     static_cast<Derived *>(this)->update_(std::forward<Args>(args)...);
   }
 
@@ -150,20 +123,14 @@ struct ObjectWidget : public Widget
   {
   }
 
-  WidgetPtr clone(ObjectWidget * parent) const override
-  {
-    return clone_object(parent);
-  }
+  WidgetPtr clone(ObjectWidget * parent) const override { return clone_object(parent); }
 
   ObjectWidgetPtr clone_object(ObjectWidget * parent) const
   {
     auto out = std::make_unique<ObjectWidget>(parent_, name_, parent, requiredOnly_);
     auto clone_widgets = [&out](const std::vector<WidgetPtr> & widgets_in, std::vector<WidgetPtr> & widgets_out)
     {
-      for(const auto & w : widgets_in)
-      {
-        widgets_out.push_back(w->clone(out.get()));
-      }
+      for(const auto & w : widgets_in) { widgets_out.push_back(w->clone(out.get())); }
     };
     clone_widgets(requiredWidgets_, out->requiredWidgets_);
     clone_widgets(otherWidgets_, out->otherWidgets_);
@@ -175,10 +142,7 @@ struct ObjectWidget : public Widget
     return std::all_of(requiredWidgets_.begin(), requiredWidgets_.end(), [](const auto & w) { return w->ready(); });
   }
 
-  void draw_() override
-  {
-    draw_(false);
-  }
+  void draw_() override { draw_(false); }
 
   void draw_(bool is_root)
   {
@@ -188,10 +152,7 @@ struct ObjectWidget : public Widget
       {
         widgets[i]->draw();
         locked_ = locked_ || widgets[i]->locked();
-        if(i + 1 != widgets.size())
-        {
-          IndentedSeparator();
-        }
+        if(i + 1 != widgets.size()) { IndentedSeparator(); }
       }
     };
     if(!is_root)
@@ -203,46 +164,25 @@ struct ObjectWidget : public Widget
     // FIXME Maybe always show if there is few optional elements?
     if(requiredWidgets_.size() == 0 || (otherWidgets_.size() && ImGui::CollapsingHeader(label("Optional").c_str())))
     {
-      if(requiredWidgets_.size() != 0)
-      {
-        ImGui::Indent();
-      }
+      if(requiredWidgets_.size() != 0) { ImGui::Indent(); }
       drawWidgets(otherWidgets_);
-      if(requiredWidgets_.size() != 0)
-      {
-        ImGui::Unindent();
-      }
+      if(requiredWidgets_.size() != 0) { ImGui::Unindent(); }
     }
-    if(!is_root)
-    {
-      ImGui::Unindent();
-    }
+    if(!is_root) { ImGui::Unindent(); }
   }
 
   void draw3D() override
   {
-    for(auto & w : requiredWidgets_)
-    {
-      w->draw3D();
-    }
-    for(auto & w : otherWidgets_)
-    {
-      w->draw3D();
-    }
+    for(auto & w : requiredWidgets_) { w->draw3D(); }
+    for(auto & w : otherWidgets_) { w->draw3D(); }
   }
 
-  bool trivial() const override
-  {
-    return false;
-  }
+  bool trivial() const override { return false; }
 
   void collect(mc_rtc::Configuration & out_) override
   {
     mc_rtc::Configuration out = out_;
-    if(parentForm_ != nullptr)
-    {
-      out = out.add(name_);
-    }
+    if(parentForm_ != nullptr) { out = out.add(name_); }
     for(auto & w : requiredWidgets_)
     {
       w->collect(out);
@@ -263,42 +203,24 @@ struct ObjectWidget : public Widget
 
   void update(const mc_rtc::Configuration & config) override
   {
-    if(locked_)
-    {
-      return;
-    }
+    if(locked_) { return; }
     std::map<std::string, mc_rtc::Configuration> values = config;
-    for(auto & w : requiredWidgets_)
-    {
-      w->update(values.at(w->name()));
-    }
+    for(auto & w : requiredWidgets_) { w->update(values.at(w->name())); }
     for(auto & w : otherWidgets_)
     {
       auto it = values.find(w->name());
-      if(it != values.end())
-      {
-        w->update(it->second);
-      }
+      if(it != values.end()) { w->update(it->second); }
     }
   }
 
   template<typename WidgetT, typename... Args>
   ObjectWidget * widget(const std::string & name, bool required, Args &&... args)
   {
-    if(required || requiredOnly_)
-    {
-      return widget<WidgetT>(name, requiredWidgets_, std::forward<Args>(args)...);
-    }
-    else
-    {
-      return widget<WidgetT>(name, otherWidgets_, std::forward<Args>(args)...);
-    }
+    if(required || requiredOnly_) { return widget<WidgetT>(name, requiredWidgets_, std::forward<Args>(args)...); }
+    else { return widget<WidgetT>(name, otherWidgets_, std::forward<Args>(args)...); }
   }
 
-  inline ObjectWidget * parentForm() noexcept
-  {
-    return parentForm_;
-  }
+  inline ObjectWidget * parentForm() noexcept { return parentForm_; }
 
   using Widget::value;
 
@@ -309,19 +231,13 @@ struct ObjectWidget : public Widget
     if(it == requiredWidgets_.end())
     {
       it = std::find_if(otherWidgets_.begin(), otherWidgets_.end(), pred);
-      if(it == otherWidgets_.end())
-      {
-        return "";
-      }
+      if(it == otherWidgets_.end()) { return ""; }
     }
     return (*it)->value();
   }
 
   /** Returns all widgets in the object */
-  inline const std::vector<form::WidgetPtr> & widgets() const noexcept
-  {
-    return requiredWidgets_;
-  }
+  inline const std::vector<form::WidgetPtr> & widgets() const noexcept { return requiredWidgets_; }
 
 protected:
   ObjectWidget * parentForm_ = nullptr;
@@ -359,14 +275,8 @@ struct ObjectArrayWidget : public Widget
   bool ready() override
   {
     bool objects_ready = std::all_of(objects_.begin(), objects_.end(), [](const auto & w) { return w->ready(); });
-    if(required_)
-    {
-      return objects_ready;
-    }
-    else
-    {
-      return objects_.size() && objects_ready;
-    }
+    if(required_) { return objects_ready; }
+    else { return objects_.size() && objects_ready; }
   }
 
   void draw_() override
@@ -388,10 +298,7 @@ struct ObjectArrayWidget : public Widget
       objects_[i]->draw_();
       locked_ = locked_ || objects_[i]->locked();
     }
-    for(size_t i = to_delete.size(); i > 0; --i)
-    {
-      objects_.erase(objects_.begin() + to_delete[i - 1]);
-    }
+    for(size_t i = to_delete.size(); i > 0; --i) { objects_.erase(objects_.begin() + to_delete[i - 1]); }
     IndentedSeparator();
     if(ImGui::Button(label("+").c_str()))
     {
@@ -403,16 +310,10 @@ struct ObjectArrayWidget : public Widget
 
   void draw3D() override
   {
-    for(auto & o : objects_)
-    {
-      o->draw3D();
-    }
+    for(auto & o : objects_) { o->draw3D(); }
   }
 
-  bool trivial() const override
-  {
-    return false;
-  }
+  bool trivial() const override { return false; }
 
   void collect(mc_rtc::Configuration & out_) override
   {
@@ -436,26 +337,17 @@ struct ObjectArrayWidget : public Widget
 
   virtual void update(const std::vector<mc_rtc::Configuration> & data)
   {
-    if(locked_)
-    {
-      return;
-    }
+    if(locked_) { return; }
     objects_.resize(data.size());
     for(size_t i = 0; i < objects_.size(); ++i)
     {
       auto & o = objects_[i];
-      if(!o || !o->locked())
-      {
-        o = primaryForm_->clone_object(nullptr);
-      }
+      if(!o || !o->locked()) { o = primaryForm_->clone_object(nullptr); }
       o->update(data[i]);
     }
   }
 
-  inline ObjectWidget * primary() noexcept
-  {
-    return primaryForm_.get();
-  }
+  inline ObjectWidget * primary() noexcept { return primaryForm_.get(); }
 
 protected:
   bool required_;
@@ -506,37 +398,22 @@ struct GenericArrayWidget : public ObjectArrayWidget
                ObjectWidget * /*parent*/,
                const std::optional<std::vector<mc_rtc::Configuration>> & data)
   {
-    if(locked_)
-    {
-      return;
-    }
+    if(locked_) { return; }
     data_ = data;
-    if(data)
-    {
-      update(*data);
-    }
+    if(data) { update(*data); }
   }
 
   using ObjectArrayWidget::update;
 
   void update(const std::vector<mc_rtc::Configuration> & data) override
   {
-    if(locked_)
-    {
-      return;
-    }
+    if(locked_) { return; }
     objects_.resize(data.size());
     for(size_t i = 0; i < objects_.size(); ++i)
     {
       auto & o = objects_[i];
-      if(!o || o->widgets().size() == 0)
-      {
-        o = primaryForm_->clone_object(nullptr);
-      }
-      if(o->widgets().size())
-      {
-        o->widgets()[0]->update(data[i]);
-      }
+      if(!o || o->widgets().size() == 0) { o = primaryForm_->clone_object(nullptr); }
+      if(o->widgets().size()) { o->widgets()[0]->update(data[i]); }
     }
   }
 
@@ -567,10 +444,7 @@ struct OneOfWidget : public Widget
     return std::make_unique<OneOfWidget>(parent_, name_, container_->clone_object(parent), data_);
   }
 
-  bool ready() override
-  {
-    return active_ && active_->ready();
-  }
+  bool ready() override { return active_ && active_->ready(); }
 
   void draw_() override
   {
@@ -596,17 +470,11 @@ struct OneOfWidget : public Widget
             active_idx_ = i;
           }
         }
-        if(active_ && active_->name() == w->name())
-        {
-          ImGui::SetItemDefaultFocus();
-        }
+        if(active_ && active_->name() == w->name()) { ImGui::SetItemDefaultFocus(); }
       }
       ImGui::EndCombo();
     }
-    if(!active_)
-    {
-      return;
-    }
+    if(!active_) { return; }
     IndentedSeparator();
     ImGui::Spacing();
     ImGui::Indent();
@@ -617,16 +485,10 @@ struct OneOfWidget : public Widget
 
   void draw3D() override
   {
-    if(active_)
-    {
-      active_->draw3D();
-    }
+    if(active_) { active_->draw3D(); }
   }
 
-  bool trivial() const override
-  {
-    return false;
-  }
+  bool trivial() const override { return false; }
 
   void collect(mc_rtc::Configuration & out_) override
   {
@@ -643,23 +505,14 @@ struct OneOfWidget : public Widget
 
   void update_(ObjectWidget * /*parent*/, const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data)
   {
-    if(data)
-    {
-      update(*data);
-    }
+    if(data) { update(*data); }
   }
 
   void update(const std::pair<size_t, mc_rtc::Configuration> & data)
   {
-    if(locked_)
-    {
-      return;
-    }
+    if(locked_) { return; }
     data_ = data;
-    if(data.first >= container_->widgets().size())
-    {
-      return;
-    }
+    if(data.first >= container_->widgets().size()) { return; }
     if(data.first != active_idx_)
     {
       active_idx_ = data.first;
@@ -673,10 +526,7 @@ struct OneOfWidget : public Widget
     update(data_.operator std::pair<size_t, mc_rtc::Configuration>());
   }
 
-  inline ObjectWidget * container() noexcept
-  {
-    return container_.get();
-  }
+  inline ObjectWidget * container() noexcept { return container_.get(); }
 
 private:
   ObjectWidgetPtr container_;
@@ -696,34 +546,16 @@ struct SimpleInput : public Widget
               const std::optional<DataT> & temp = std::nullopt)
   : Widget(parent, name), value_(value)
   {
-    if(temp.has_value())
-    {
-      temp_ = temp.value();
-    }
-    else if(value_.has_value())
-    {
-      temp_ = value.value();
-    }
+    if(temp.has_value()) { temp_ = temp.value(); }
+    else if(value_.has_value()) { temp_ = value.value(); }
     else
     {
-      if constexpr(std::is_arithmetic_v<DataT>)
-      {
-        temp_ = 0;
-      }
+      if constexpr(std::is_arithmetic_v<DataT>) { temp_ = 0; }
       else
       {
-        if constexpr(std::is_same_v<DataT, sva::PTransformd>)
-        {
-          temp_ = sva::PTransformd::Identity();
-        }
-        else if constexpr(std::is_same_v<DataT, Eigen::Vector3d>)
-        {
-          temp_ = Eigen::Vector3d::Zero();
-        }
-        else
-        {
-          temp_ = {};
-        }
+        if constexpr(std::is_same_v<DataT, sva::PTransformd>) { temp_ = sva::PTransformd::Identity(); }
+        else if constexpr(std::is_same_v<DataT, Eigen::Vector3d>) { temp_ = Eigen::Vector3d::Zero(); }
+        else { temp_ = {}; }
       }
     }
   }
@@ -736,51 +568,30 @@ struct SimpleInput : public Widget
     {
       return value_.has_value() && value_.value().size() != 0;
     }
-    else
-    {
-      return value_.has_value();
-    }
+    else { return value_.has_value(); }
   }
 
   void collect(mc_rtc::Configuration & out) override
   {
-    if(ready())
-    {
-      out.add(name(), value_.value());
-    }
-    else
-    {
-      out.add(name(), temp_);
-    }
+    if(ready()) { out.add(name(), value_.value()); }
+    else { out.add(name(), temp_); }
   }
 
   std::string value() override
   {
-    if constexpr(std::is_same_v<DataT, std::string>)
-    {
-      return value_.has_value() ? value_.value() : "";
-    }
-    else
-    {
-      return fmt::format("{}", value_.has_value() ? value_.value() : temp_);
-    }
+    if constexpr(std::is_same_v<DataT, std::string>) { return value_.has_value() ? value_.value() : ""; }
+    else { return fmt::format("{}", value_.has_value() ? value_.value() : temp_); }
   }
 
   void update_(const std::optional<DataT> & value)
   {
     value_ = value;
-    if(value_.has_value())
-    {
-      temp_ = value_.value();
-    }
+    if(value_.has_value()) { temp_ = value_.value(); }
   }
 
   void update(const mc_rtc::Configuration & data) override
   {
-    if(locked_)
-    {
-      return;
-    }
+    if(locked_) { return; }
     update_(data.operator DataT());
   }
 
@@ -793,10 +604,7 @@ struct Checkbox : public SimpleInput<bool>
 {
   using SimpleInput::SimpleInput;
 
-  WidgetPtr clone(ObjectWidget *) const override
-  {
-    return std::make_unique<Checkbox>(parent_, name_, value_);
-  }
+  WidgetPtr clone(ObjectWidget *) const override { return std::make_unique<Checkbox>(parent_, name_, value_); }
 
   inline void draw_() override
   {
@@ -813,10 +621,7 @@ struct IntegerInput : public SimpleInput<int>
 {
   using SimpleInput::SimpleInput;
 
-  WidgetPtr clone(ObjectWidget *) const override
-  {
-    return std::make_unique<IntegerInput>(parent_, name_, value_);
-  }
+  WidgetPtr clone(ObjectWidget *) const override { return std::make_unique<IntegerInput>(parent_, name_, value_); }
 
   inline void draw_() override
   {
@@ -833,10 +638,7 @@ struct NumberInput : public SimpleInput<double>
 {
   using SimpleInput::SimpleInput;
 
-  WidgetPtr clone(ObjectWidget *) const override
-  {
-    return std::make_unique<NumberInput>(parent_, name_, value_);
-  }
+  WidgetPtr clone(ObjectWidget *) const override { return std::make_unique<NumberInput>(parent_, name_, value_); }
 
   inline void draw_() override
   {
@@ -853,10 +655,7 @@ struct StringInput : public SimpleInput<std::string>
 {
   using SimpleInput::SimpleInput;
 
-  WidgetPtr clone(ObjectWidget *) const override
-  {
-    return std::make_unique<StringInput>(parent_, name_, value_);
-  }
+  WidgetPtr clone(ObjectWidget *) const override { return std::make_unique<StringInput>(parent_, name_, value_); }
 
   inline void draw_() override
   {
@@ -909,14 +708,8 @@ private:
 template<typename T>
 static inline sva::PTransformd value_or(const std::optional<T> & data)
 {
-  if constexpr(std::is_same_v<T, Eigen::Vector3d>)
-  {
-    return {data.value_or(Eigen::Vector3d::Zero())};
-  }
-  else
-  {
-    return data.value_or(sva::PTransformd::Identity());
-  }
+  if constexpr(std::is_same_v<T, Eigen::Vector3d>) { return {data.value_or(Eigen::Vector3d::Zero())}; }
+  else { return data.value_or(sva::PTransformd::Identity()); }
 }
 
 template<typename DataT, ::mc_rtc::imgui::ControlAxis axis>
@@ -933,15 +726,9 @@ struct InteractiveMarkerInput : public SimpleInput<DataT>
 
   inline void draw_() override
   {
-    if(!interactive_)
-    {
-      return;
-    }
+    if(!interactive_) { return; }
     ImGui::SameLine();
-    if(ImGui::Button(this->label(visible_ ? "Hide" : "Show").c_str()))
-    {
-      visible_ = !visible_;
-    }
+    if(ImGui::Button(this->label(visible_ ? "Hide" : "Show").c_str())) { visible_ = !visible_; }
   }
 
   inline void draw_translation_input(Eigen::Vector3d & data)
@@ -961,18 +748,12 @@ struct InteractiveMarkerInput : public SimpleInput<DataT>
         if constexpr(std::is_same_v<DataT, Eigen::Vector3d>)
         {
           this->value_ = data;
-          if(marker_)
-          {
-            marker_->pose({data});
-          }
+          if(marker_) { marker_->pose({data}); }
         }
         else
         {
           this->value_.value().translation() = data;
-          if(marker_)
-          {
-            marker_->pose(data);
-          }
+          if(marker_) { marker_->pose(data); }
         }
         this->locked_ = true;
       }
@@ -992,22 +773,10 @@ struct InteractiveMarkerInput : public SimpleInput<DataT>
     }
     auto get_ptr = [&](size_t i)
     {
-      if(i == 0)
-      {
-        return &quat.w();
-      }
-      else if(i == 1)
-      {
-        return &quat.x();
-      }
-      else if(i == 2)
-      {
-        return &quat.y();
-      }
-      else
-      {
-        return &quat.z();
-      }
+      if(i == 0) { return &quat.w(); }
+      else if(i == 1) { return &quat.x(); }
+      else if(i == 2) { return &quat.y(); }
+      else { return &quat.z(); }
     };
     for(size_t i = 0; i < 4; ++i)
     {
@@ -1016,10 +785,7 @@ struct InteractiveMarkerInput : public SimpleInput<DataT>
       {
         this->temp_.rotation() = quat.toRotationMatrix();
         this->value_ = this->temp_;
-        if(marker_)
-        {
-          marker_->pose(this->temp_);
-        }
+        if(marker_) { marker_->pose(this->temp_); }
         this->locked_ = true;
       }
     }
@@ -1028,19 +794,13 @@ struct InteractiveMarkerInput : public SimpleInput<DataT>
 
   inline void draw3D() override
   {
-    if(!interactive_)
-    {
-      return;
-    }
+    if(!interactive_) { return; }
     if(visible_ && marker_)
     {
       if(marker_->draw())
       {
         this->locked_ = true;
-        if constexpr(std::is_same_v<DataT, Eigen::Vector3d>)
-        {
-          this->temp_ = marker_->pose().translation();
-        }
+        if constexpr(std::is_same_v<DataT, Eigen::Vector3d>) { this->temp_ = marker_->pose().translation(); }
         else
         {
           static_assert(std::is_same_v<DataT, sva::PTransformd>);
@@ -1140,14 +900,8 @@ struct ComboInput : public SimpleInput<std::string>
   inline void collect(mc_rtc::Configuration & out) override
   {
     assert(ready());
-    if(send_index_)
-    {
-      out.add(name(), static_cast<unsigned int>(idx_));
-    }
-    else
-    {
-      out.add(name(), value_.value());
-    }
+    if(send_index_) { out.add(name(), static_cast<unsigned int>(idx_)); }
+    else { out.add(name(), value_.value()); }
   }
 
   void update_(const std::vector<std::string> & values, bool send_index, int user_default = -1);
@@ -1189,14 +943,8 @@ ObjectWidget * ObjectWidget::widget(const std::string & name, std::vector<form::
     widgets.push_back(std::make_unique<WidgetT>(parent_, name, std::forward<Args>(args)...));
     it = widgets.end() - 1;
   }
-  else
-  {
-    (*it)->template update<WidgetT>(std::forward<Args>(args)...);
-  }
-  if constexpr(std::is_same_v<WidgetT, ObjectWidget>)
-  {
-    return static_cast<ObjectWidget *>(it->get());
-  }
+  else { (*it)->template update<WidgetT>(std::forward<Args>(args)...); }
+  if constexpr(std::is_same_v<WidgetT, ObjectWidget>) { return static_cast<ObjectWidget *>(it->get()); }
   else if constexpr(std::is_same_v<WidgetT, ObjectArrayWidget>)
   {
     return static_cast<ObjectArrayWidget *>(it->get())->primary();
@@ -1205,14 +953,8 @@ ObjectWidget * ObjectWidget::widget(const std::string & name, std::vector<form::
   {
     return static_cast<GenericArrayWidget *>(it->get())->primary();
   }
-  else if constexpr(std::is_same_v<WidgetT, OneOfWidget>)
-  {
-    return static_cast<OneOfWidget *>(it->get())->container();
-  }
-  else
-  {
-    return this;
-  }
+  else if constexpr(std::is_same_v<WidgetT, OneOfWidget>) { return static_cast<OneOfWidget *>(it->get())->container(); }
+  else { return this; }
 }
 
 } // namespace form

@@ -11,15 +11,9 @@ struct IntegerInput : public SingleInput<int>
 
   ~IntegerInput() override = default;
 
-  void setupBuffer() override
-  {
-    buffer_ = data_;
-  }
+  void setupBuffer() override { buffer_ = data_; }
 
-  int dataFromBuffer() override
-  {
-    return buffer_;
-  }
+  int dataFromBuffer() override { return buffer_; }
 
   inline void draw2D() override
   {

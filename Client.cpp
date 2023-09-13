@@ -71,10 +71,7 @@ void Client::draw2D(ImVec2 windowSize)
           p.second->do_plot();
           ImGui::EndTabItem();
         }
-        else
-        {
-          disable_bold_font();
-        }
+        else { disable_bold_font(); }
       }
       for(auto it = inactive_plots_.begin(); it != inactive_plots_.end();)
       {
@@ -91,10 +88,7 @@ void Client::draw2D(ImVec2 windowSize)
       ImGui::EndTabBar();
     }
     ImGui::End();
-    if(!open_plots)
-    {
-      inactive_plots_.clear();
-    }
+    if(!open_plots) { inactive_plots_.clear(); }
   }
 }
 
@@ -118,10 +112,7 @@ void Client::stopped()
       inactive_plots_.push_back(it->second);
       it = active_plots_.erase(it);
     }
-    else
-    {
-      ++it;
-    }
+    else { ++it; }
   }
 }
 
@@ -133,18 +124,12 @@ void Client::clear()
 
 void Client::enable_bold_font()
 {
-  if(bold_font_)
-  {
-    ImGui::PushFont(bold_font_);
-  }
+  if(bold_font_) { ImGui::PushFont(bold_font_); }
 }
 
 void Client::disable_bold_font()
 {
-  if(bold_font_)
-  {
-    ImGui::PopFont();
-  }
+  if(bold_font_) { ImGui::PopFont(); }
 }
 
 /** We rely on widgets to create categories */
@@ -228,10 +213,7 @@ void Client::form(const ElementId & id)
 template<typename T>
 std::optional<T> null_or_default(const T & value, bool user_default)
 {
-  if(user_default)
-  {
-    return value;
-  }
+  if(user_default) { return value; }
   return std::nullopt;
 }
 
@@ -384,24 +366,15 @@ auto Client::getCategory(const std::vector<std::string> & category) -> Category 
     auto & cat = out.get();
     auto & next = category[i];
     auto it = std::find_if(cat.categories.begin(), cat.categories.end(), [&](auto & c) { return c->name == next; });
-    if(it != cat.categories.end())
-    {
-      out = std::ref(*it->get());
-    }
-    else
-    {
-      out = *cat.categories.emplace_back(std::make_unique<Category>(next, cat.depth + 1));
-    }
+    if(it != cat.categories.end()) { out = std::ref(*it->get()); }
+    else { out = *cat.categories.emplace_back(std::make_unique<Category>(next, cat.depth + 1)); }
   }
   return out.get();
 }
 
 void Client::start_plot(uint64_t id, const std::string & title)
 {
-  if(!active_plots_.count(id))
-  {
-    active_plots_[id] = std::make_shared<Plot>(title);
-  }
+  if(!active_plots_.count(id)) { active_plots_[id] = std::make_shared<Plot>(title); }
   if(active_plots_[id]->title() != title)
   {
     inactive_plots_.push_back(active_plots_[id]);

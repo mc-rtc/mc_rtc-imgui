@@ -47,10 +47,7 @@ struct InteractiveMarker
 
   virtual ~InteractiveMarker() = 0;
 
-  inline const sva::PTransformd & pose() const noexcept
-  {
-    return pose_;
-  }
+  inline const sva::PTransformd & pose() const noexcept { return pose_; }
 
   /** Change the interaction mask of the marker */
   virtual void mask(ControlAxis mask) = 0;

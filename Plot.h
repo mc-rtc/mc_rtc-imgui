@@ -22,10 +22,7 @@ struct Plot
 
   Plot(const std::string & title);
 
-  inline const std::string & title() const noexcept
-  {
-    return title_;
-  }
+  inline const std::string & title() const noexcept { return title_; }
 
   inline void start_plot() noexcept
   {

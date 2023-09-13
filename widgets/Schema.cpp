@@ -43,10 +43,7 @@ namespace
 std::string removeFakeDir(const std::string & in)
 {
   std::string_view fakeDir = "/../";
-  if(in.size() >= fakeDir.size() && in.substr(0, fakeDir.size()) == fakeDir)
-  {
-    return in.substr(fakeDir.size());
-  }
+  if(in.size() >= fakeDir.size() && in.substr(0, fakeDir.size()) == fakeDir) { return in.substr(fakeDir.size()); }
   if(in.size() >= fakeDir.size() && in.substr(0, fakeDir.size() - 1) == fakeDir.substr(1))
   {
     return in.substr(fakeDir.size() - 1);
@@ -60,10 +57,7 @@ void resolveRef(const bfs::path & path,
 {
   if(conf.size())
   {
-    for(size_t i = 0; i < conf.size(); ++i)
-    {
-      resolveRef(path, conf[i], loadFn);
-    }
+    for(size_t i = 0; i < conf.size(); ++i) { resolveRef(path, conf[i], loadFn); }
   }
   else
   {
@@ -76,17 +70,11 @@ void resolveRef(const bfs::path & path,
         auto refKeys = ref.keys();
         for(const auto & rk : refKeys)
         {
-          if(!conf.has(rk))
-          {
-            conf.add(rk, ref(rk));
-          }
+          if(!conf.has(rk)) { conf.add(rk, ref(rk)); }
         }
         conf.remove("$ref");
       }
-      else
-      {
-        resolveRef(path, conf(k), loadFn);
-      }
+      else { resolveRef(path, conf(k), loadFn); }
     }
   }
 }
@@ -95,10 +83,7 @@ void resolveAllOf(mc_rtc::Configuration conf)
 {
   if(conf.size())
   {
-    for(size_t i = 0; i < conf.size(); ++i)
-    {
-      resolveAllOf(conf[i]);
-    }
+    for(size_t i = 0; i < conf.size(); ++i) { resolveAllOf(conf[i]); }
   }
   else
   {
@@ -115,10 +100,7 @@ void resolveAllOf(mc_rtc::Configuration conf)
         }
         conf.remove("allOf");
       }
-      else
-      {
-        resolveAllOf(conf(k));
-      }
+      else { resolveAllOf(conf(k)); }
     }
   }
 }
@@ -152,20 +134,11 @@ struct SchemaForm
     return out;
   }
 
-  const std::string & title()
-  {
-    return object_->fullName();
-  }
+  const std::string & title() { return object_->fullName(); }
 
-  std::optional<std::string> value(const std::string & name) const
-  {
-    return object_->value(name);
-  }
+  std::optional<std::string> value(const std::string & name) const { return object_->value(name); }
 
-  bool ready() const
-  {
-    return object_->ready();
-  }
+  bool ready() const { return object_->ready(); }
 
 private:
   std::unique_ptr<form::ObjectForm> object_;
@@ -177,10 +150,7 @@ Schema::~Schema() {}
 
 void Schema::data(const std::string & schema)
 {
-  if(schema == schema_)
-  {
-    return;
-  }
+  if(schema == schema_) { return; }
   form_.reset(nullptr);
   schema_ = schema;
 #ifndef __EMSCRIPTEN__
@@ -216,10 +186,7 @@ void Schema::draw2D()
       {
         form_ = std::make_unique<SchemaForm>(*this, s.first, s.second);
       }
-      if(selected)
-      {
-        ImGui::SetItemDefaultFocus();
-      }
+      if(selected) { ImGui::SetItemDefaultFocus(); }
     }
     ImGui::EndCombo();
   }
@@ -236,23 +203,14 @@ void Schema::draw2D()
 
 std::optional<std::string> Schema::value(const std::string & name) const
 {
-  if(form_)
-  {
-    return form_->value(name);
-  }
+  if(form_) { return form_->value(name); }
   return "";
 }
 
 mc_rtc::Configuration & Schema::loadSchema(const bfs::path & path)
 {
-  if(details::canonical(path) != path)
-  {
-    return loadSchema(details::canonical(path));
-  }
-  if(all_schemas_.count(path.string()))
-  {
-    return all_schemas_[path.string()];
-  }
+  if(details::canonical(path) != path) { return loadSchema(details::canonical(path)); }
+  if(all_schemas_.count(path.string())) { return all_schemas_[path.string()]; }
   if(!bfs::exists(path))
   {
     mc_rtc::log::error_and_throw<std::runtime_error>("No schema can be loaded from {}", path.string());

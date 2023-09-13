@@ -24,10 +24,7 @@ struct NumberSlider : public Widget
     ImGui::TableNextColumn();
     ImGui::Text("%s", id.name.c_str());
     ImGui::TableNextColumn();
-    if(ImGui::SliderFloat(label("").c_str(), &data_, min_, max_))
-    {
-      client.send_request(id, data_);
-    }
+    if(ImGui::SliderFloat(label("").c_str(), &data_, min_, max_)) { client.send_request(id, data_); }
     ImGui::EndTable();
   }
 

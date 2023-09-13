@@ -39,10 +39,7 @@ struct ArrayLabel : public Widget
     {
       ImGui::TableNextColumn();
       ImGui::Text("%s", labels_[i].c_str());
-      if(i == 0)
-      {
-        min = ImGui::GetItemRectMin();
-      }
+      if(i == 0) { min = ImGui::GetItemRectMin(); }
     }
     ImGui::TableNextRow();
     ImVec2 max;
@@ -50,14 +47,8 @@ struct ArrayLabel : public Widget
     {
       ImGui::TableNextColumn();
       ImGui::Text("%.4f", data_(i));
-      if(i == 0 && labels_.size() == 0)
-      {
-        min = ImGui::GetItemRectMin();
-      }
-      if(i == data_.size() - 1)
-      {
-        max = ImGui::GetItemRectMax();
-      }
+      if(i == 0 && labels_.size() == 0) { min = ImGui::GetItemRectMin(); }
+      if(i == data_.size() - 1) { max = ImGui::GetItemRectMax(); }
     }
     ImGui::EndTable();
     if(ImGui::IsMouseHoveringRect(min, max))

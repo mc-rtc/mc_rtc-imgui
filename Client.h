@@ -40,15 +40,9 @@ struct Client : public mc_control::ControllerClient
   /** Remove all elements */
   void clear();
 
-  inline const mc_rtc::Configuration & data() const noexcept
-  {
-    return data_;
-  }
+  inline const mc_rtc::Configuration & data() const noexcept { return data_; }
 
-  inline void set_bold_font(ImFont * font)
-  {
-    bold_font_ = font;
-  }
+  inline void set_bold_font(ImFont * font) { bold_font_ = font; }
 
   void enable_bold_font();
 
@@ -227,10 +221,7 @@ protected:
   /** Throw if active_form is not set */
   inline void require_active_form()
   {
-    if(!active_form_)
-    {
-      mc_rtc::log::error_and_throw("No active form at this point");
-    }
+    if(!active_form_) { mc_rtc::log::error_and_throw("No active form at this point"); }
   }
 
   /** Currently active plots */

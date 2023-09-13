@@ -15,19 +15,10 @@ inline void range_to_limits(const mc_rtc::gui::plot::Range & range,
   if(range.min != -range.inf || range.max != range.inf)
   {
     limits = {range.min, range.max};
-    if(range.min == -range.inf)
-    {
-      limits->first = plotRange.Min;
-    }
-    if(range.max == range.inf)
-    {
-      limits->second = plotRange.Max;
-    }
+    if(range.min == -range.inf) { limits->first = plotRange.Min; }
+    if(range.max == range.inf) { limits->second = plotRange.Max; }
   }
-  else
-  {
-    limits = std::nullopt;
-  }
+  else { limits = std::nullopt; }
 }
 
 } // namespace
@@ -62,7 +53,8 @@ void Plot::plot_point(uint64_t did,
                       mc_rtc::gui::plot::Style style,
                       mc_rtc::gui::plot::Side side)
 {
-  auto get_plot = [&]() -> PlotLine & {
+  auto get_plot = [&]() -> PlotLine &
+  {
     if(!plots_.count(did))
     {
       plots_[did] = {};
@@ -85,10 +77,7 @@ void Plot::plot_polygon(uint64_t did,
                         mc_rtc::gui::plot::Side side)
 {
   auto & poly = polygons_[did];
-  if(poly.polygon != polygon)
-  {
-    poly.polygon = polygon;
-  }
+  if(poly.polygon != polygon) { poly.polygon = polygon; }
   poly.label = label;
   poly.side = side;
   side == Side::Left ? y_plots_++ : y2_plots_++;
@@ -100,10 +89,7 @@ void Plot::plot_polygons(uint64_t did,
                          mc_rtc::gui::plot::Side side)
 {
   auto & group = polygonGroups_[did];
-  if(group.polygons != polygons)
-  {
-    group.polygons = polygons;
-  }
+  if(group.polygons != polygons) { group.polygons = polygons; }
   group.label = label;
   group.side = side;
   side == Side::Left ? y_plots_++ : y2_plots_++;
@@ -120,10 +106,7 @@ void Plot::do_plot()
     y_flags = ImPlotAxisFlags_NoDecorations;
     y_label = nullptr;
   }
-  else
-  {
-    y2_flags |= ImPlotAxisFlags_NoGridLines;
-  }
+  else { y2_flags |= ImPlotAxisFlags_NoGridLines; }
   const char * y2_label = y2_label_.c_str();
   if(y2_plots_ == 0)
   {
@@ -131,41 +114,26 @@ void Plot::do_plot()
     y2_label = nullptr;
   }
   bool do_ = ImPlot::BeginPlot(fmt::format("{}##{}", title_, uid_).c_str(), ImVec2{-1, 0}, ImPlotFlags_YAxis2);
-  if(!do_)
-  {
-    return;
-  }
+  if(!do_) { return; }
   ImPlot::SetupAxis(ImAxis_X1, x_label_.c_str(), x_flags);
-  if(y_plots_ != 0)
+  if(y_plots_ != 0) { ImPlot::SetupAxis(ImAxis_Y1, y_label, y_flags); }
+  if(y2_plots_ != 0) { ImPlot::SetupAxis(ImAxis_Y2, y2_label, y2_flags); }
+  if(x_limits_) { ImPlot::SetupAxisLimits(ImAxis_X1, x_limits_->first, x_limits_->second, ImGuiCond_Always); }
+  if(y_limits_) { ImPlot::SetupAxisLimits(ImAxis_Y1, y_limits_->first, y_limits_->second, ImGuiCond_Always); }
+  if(y2_limits_) { ImPlot::SetupAxisLimits(ImAxis_Y2, y2_limits_->first, y2_limits_->second, ImGuiCond_Always); }
+  auto toImVec4 = [](const Color & color)
   {
-    ImPlot::SetupAxis(ImAxis_Y1, y_label, y_flags);
-  }
-  if(y2_plots_ != 0)
-  {
-    ImPlot::SetupAxis(ImAxis_Y2, y2_label, y2_flags);
-  }
-  if(x_limits_)
-  {
-    ImPlot::SetupAxisLimits(ImAxis_X1, x_limits_->first, x_limits_->second, ImGuiCond_Always);
-  }
-  if(y_limits_)
-  {
-    ImPlot::SetupAxisLimits(ImAxis_Y1, y_limits_->first, y_limits_->second, ImGuiCond_Always);
-  }
-  if(y2_limits_)
-  {
-    ImPlot::SetupAxisLimits(ImAxis_Y2, y2_limits_->first, y2_limits_->second, ImGuiCond_Always);
-  }
-  auto toImVec4 = [](const Color & color) {
     return ImVec4{static_cast<float>(color.r), static_cast<float>(color.g), static_cast<float>(color.b),
                   static_cast<float>(color.a)};
   };
-  auto toImU32 = [](const Color & color) {
+  auto toImU32 = [](const Color & color)
+  {
     return ImGui::ColorConvertFloat4ToU32({static_cast<float>(color.r), static_cast<float>(color.g),
                                            static_cast<float>(color.b), static_cast<float>(color.a)});
   };
   ImPlot::PushStyleVar(ImPlotStyleVar_FitPadding, ImVec2{0.1f, 0.1f});
-  auto plot_poly = [this, &toImU32](const PolygonDescription & poly, Side side) {
+  auto plot_poly = [this, &toImU32](const PolygonDescription & poly, Side side)
+  {
     auto * draw_list = ImPlot::GetPlotDrawList();
     const auto & style = poly.style();
     // FIXME Handle style
@@ -177,15 +145,9 @@ void Plot::do_plot()
     for(size_t i = 0; i < poly.points().size(); ++i)
     {
       points_[i] = ImPlot::PlotToPixels(poly.points()[i][0], poly.points()[i][1]);
-      if(ImPlot::FitThisFrame())
-      {
-        ImPlot::FitPoint({poly.points()[i][0], poly.points()[i][1]});
-      }
+      if(ImPlot::FitThisFrame()) { ImPlot::FitPoint({poly.points()[i][0], poly.points()[i][1]}); }
     }
-    if(fillColor.a != 0.0)
-    {
-      draw_list->AddConvexPolyFilled(points_.data(), points_.size(), toImU32(fillColor));
-    }
+    if(fillColor.a != 0.0) { draw_list->AddConvexPolyFilled(points_.data(), points_.size(), toImU32(fillColor)); }
     draw_list->AddPolyline(points_.data(), points_.size(), toImU32(outlineColor), closed, 2.0f);
   };
   for(const auto & pp : polygons_)
@@ -202,10 +164,7 @@ void Plot::do_plot()
     const auto & group = pp.second;
     if(ImPlot::BeginItem(group.label.c_str()))
     {
-      for(const auto & p : group.polygons)
-      {
-        plot_poly(p, group.side);
-      }
+      for(const auto & p : group.polygons) { plot_poly(p, group.side); }
       ImPlot::EndItem();
     }
   }

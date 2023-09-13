@@ -11,21 +11,12 @@ struct Label : public Widget
 
   ~Label() override = default;
 
-  inline void data(const std::string & txt)
-  {
-    txt_ = txt;
-  }
+  inline void data(const std::string & txt) { txt_ = txt; }
 
   inline void draw2D() override
   {
-    if(txt_.size())
-    {
-      ImGui::Text("%s %s", id.name.c_str(), txt_.c_str());
-    }
-    else
-    {
-      ImGui::Text("%s", id.name.c_str());
-    }
+    if(txt_.size()) { ImGui::Text("%s %s", id.name.c_str(), txt_.c_str()); }
+    else { ImGui::Text("%s", id.name.c_str()); }
   }
 
 private:

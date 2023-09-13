@@ -11,17 +11,11 @@ struct Checkbox : public Widget
 
   ~Checkbox() override = default;
 
-  inline void data(bool data)
-  {
-    data_ = data;
-  }
+  inline void data(bool data) { data_ = data; }
 
   inline void draw2D() override
   {
-    if(ImGui::Checkbox(label(id.name).c_str(), &data_))
-    {
-      client.send_request(id);
-    }
+    if(ImGui::Checkbox(label(id.name).c_str(), &data_)) { client.send_request(id); }
   }
 
 private:

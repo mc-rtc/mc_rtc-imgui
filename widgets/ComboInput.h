@@ -24,10 +24,7 @@ struct ComboInput : public Widget
       size_t i = 0;
       for(; i < values_.size(); ++i)
       {
-        if(values_[i] == data_)
-        {
-          return i;
-        }
+        if(values_[i] == data_) { return i; }
       }
       return i;
     }();
@@ -46,10 +43,7 @@ struct ComboInput : public Widget
             client.send_request(id, data_);
           }
         }
-        if(idx == i)
-        {
-          ImGui::SetItemDefaultFocus();
-        }
+        if(idx == i) { ImGui::SetItemDefaultFocus(); }
       }
       ImGui::EndCombo();
     }

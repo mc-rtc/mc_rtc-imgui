@@ -35,10 +35,7 @@ void ArrayInput::draw_()
   }
   for(size_t i = 0; i < static_cast<size_t>(temp_.size()); ++i)
   {
-    if(table_layout)
-    {
-      ImGui::TableNextColumn();
-    }
+    if(table_layout) { ImGui::TableNextColumn(); }
     else
     {
       ImGui::Text("%s", i < labels_.size() ? labels_[i].c_str() : std::to_string(i).c_str());
@@ -55,23 +52,14 @@ void ArrayInput::draw_()
       if(ImGui::Button(label("-", i).c_str()))
       {
         Eigen::VectorXd nValue = Eigen::VectorXd::Zero(temp_.size() - 1);
-        if(i != 0)
-        {
-          nValue.head(i) = temp_.head(i);
-        }
-        if(nValue.size() - i)
-        {
-          nValue.tail(nValue.size() - i) = temp_.tail(temp_.size() - 1 - i);
-        }
+        if(i != 0) { nValue.head(i) = temp_.head(i); }
+        if(nValue.size() - i) { nValue.tail(nValue.size() - i) = temp_.tail(temp_.size() - 1 - i); }
         temp_ = nValue;
         value_ = temp_;
       }
     }
   }
-  if(table_layout)
-  {
-    ImGui::EndTable();
-  }
+  if(table_layout) { ImGui::EndTable(); }
   if(!fixed_)
   {
     if(ImGui::Button(label("+").c_str()))
@@ -121,10 +109,7 @@ void ComboInput::update_(const std::vector<std::string> & values, bool send_inde
 
 void ComboInput::update(const mc_rtc::Configuration & data_)
 {
-  if(locked_)
-  {
-    return;
-  }
+  if(locked_) { return; }
   std::string data = data_;
   auto it = std::find(values_.begin(), values_.end(), data);
   if(it != values_.end())
@@ -147,10 +132,7 @@ void ComboInput::draw_()
 
 void ComboInput::draw(const char * label_)
 {
-  if(values_.size() == 1 && value_.has_value())
-  {
-    return;
-  }
+  if(values_.size() == 1 && value_.has_value()) { return; }
   ImGui::SameLine();
   if(ImGui::BeginCombo(label("").c_str(), label_))
   {
@@ -162,10 +144,7 @@ void ComboInput::draw(const char * label_)
         locked_ = true;
         value_ = values_[i];
       }
-      if(idx_ == i)
-      {
-        ImGui::SetItemDefaultFocus();
-      }
+      if(idx_ == i) { ImGui::SetItemDefaultFocus(); }
     }
     ImGui::EndCombo();
   }
@@ -184,15 +163,9 @@ void DataComboInput::draw_()
   auto getValue = [&](const std::string & value)
   {
     auto * form_ptr = dynamic_cast<const Form *>(&parent_);
-    if(form_ptr)
-    {
-      return form_ptr->value(value);
-    }
+    if(form_ptr) { return form_ptr->value(value); }
     auto * schema_ptr = dynamic_cast<const Schema *>(&parent_);
-    if(schema_ptr)
-    {
-      return schema_ptr->value(value).value_or("");
-    }
+    if(schema_ptr) { return schema_ptr->value(value).value_or(""); }
     mc_rtc::log::error_and_throw<std::runtime_error>("Form element outisde of Form or Schema");
   };
   auto data = parent_.client.data();
@@ -202,10 +175,7 @@ void DataComboInput::draw_()
     for(size_t i = 0; i < ref_.size(); ++i)
     {
       std::string ref = ref_[i];
-      if(ref.size() && ref[0] == '$')
-      {
-        ref = getValue(ref.substr(1));
-      }
+      if(ref.size() && ref[0] == '$') { ref = getValue(ref.substr(1)); }
       if(!data.has(ref))
       {
         if(ref_[i].size() && ref_[i][0] == '$')
@@ -219,10 +189,7 @@ void DataComboInput::draw_()
           for(size_t j = 0; j <= i; ++j)
           {
             full_ref += ref_[j];
-            if(j != i)
-            {
-              full_ref += "/";
-            }
+            if(j != i) { full_ref += "/"; }
           }
           label = fmt::format("No {} entry in the data provided by the server", full_ref);
         }

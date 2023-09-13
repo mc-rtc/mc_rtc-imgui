@@ -20,20 +20,11 @@ struct Form : public Widget
   form::ObjectWidget * widget(const std::string & name, bool required, Args &&... args)
   {
     auto out = object_->widget<WidgetT>(name, required, std::forward<Args>(args)...);
-    if constexpr(std::is_same_v<WidgetT, form::ObjectWidget>)
-    {
-      return out;
-    }
-    else
-    {
-      return object_.get();
-    }
+    if constexpr(std::is_same_v<WidgetT, form::ObjectWidget>) { return out; }
+    else { return object_.get(); }
   }
 
-  inline std::string value(const std::string & name) const
-  {
-    return object_->value(name);
-  }
+  inline std::string value(const std::string & name) const { return object_->value(name); }
 
   void draw2D() override
   {
@@ -52,15 +43,9 @@ struct Form : public Widget
     }
   }
 
-  void draw3D() override
-  {
-    object_->draw3D();
-  }
+  void draw3D() override { object_->draw3D(); }
 
-  inline form::ObjectWidget * parentForm() noexcept
-  {
-    return object_.get();
-  }
+  inline form::ObjectWidget * parentForm() noexcept { return object_.get(); }
 
 protected:
   form::ObjectWidgetPtr object_;
