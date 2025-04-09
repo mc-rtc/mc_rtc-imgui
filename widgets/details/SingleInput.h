@@ -45,7 +45,7 @@ struct SingleInput : public Widget
       fn(label("", "Input").c_str(), std::forward<Args>(args)..., ImGuiInputTextFlags_None);
       if(clicked
          || (ImGui::IsItemDeactivatedAfterEdit()
-             && (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_KeyPadEnter))))
+             && (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter))))
       {
         auto nData = dataFromBuffer();
         if(nData != data_)
