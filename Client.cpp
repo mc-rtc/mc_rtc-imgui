@@ -16,6 +16,8 @@
 #include "widgets/Table.h"
 
 #include <boost/filesystem.hpp>
+// #include <fmt/core.h>
+
 namespace bfs = boost::filesystem;
 
 namespace mc_rtc::imgui

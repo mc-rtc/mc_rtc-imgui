@@ -2,6 +2,8 @@
 
 #include "implot_internal.h"
 
+// #include <fmt/core.h>
+
 namespace mc_rtc::imgui
 {
 
