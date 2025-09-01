@@ -74,7 +74,10 @@ void resolveRef(const bfs::path & path,
         }
         conf.remove("$ref");
       }
-      else { resolveRef(path, conf(k), loadFn); }
+      else
+      {
+        resolveRef(path, conf(k), loadFn);
+      }
     }
   }
 }
@@ -100,7 +103,10 @@ void resolveAllOf(mc_rtc::Configuration conf)
         }
         conf.remove("allOf");
       }
-      else { resolveAllOf(conf(k)); }
+      else
+      {
+        resolveAllOf(conf(k));
+      }
     }
   }
 }

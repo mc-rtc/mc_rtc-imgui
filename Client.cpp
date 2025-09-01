@@ -71,7 +71,10 @@ void Client::draw2D(ImVec2 windowSize)
           p.second->do_plot();
           ImGui::EndTabItem();
         }
-        else { disable_bold_font(); }
+        else
+        {
+          disable_bold_font();
+        }
       }
       for(auto it = inactive_plots_.begin(); it != inactive_plots_.end();)
       {
@@ -112,7 +115,10 @@ void Client::stopped()
       inactive_plots_.push_back(it->second);
       it = active_plots_.erase(it);
     }
-    else { ++it; }
+    else
+    {
+      ++it;
+    }
   }
 }
 
@@ -367,7 +373,10 @@ auto Client::getCategory(const std::vector<std::string> & category) -> Category 
     auto & next = category[i];
     auto it = std::find_if(cat.categories.begin(), cat.categories.end(), [&](auto & c) { return c->name == next; });
     if(it != cat.categories.end()) { out = std::ref(*it->get()); }
-    else { out = *cat.categories.emplace_back(std::make_unique<Category>(next, cat.depth + 1)); }
+    else
+    {
+      out = *cat.categories.emplace_back(std::make_unique<Category>(next, cat.depth + 1));
+    }
   }
   return out.get();
 }

@@ -21,7 +21,10 @@ struct Form : public Widget
   {
     auto out = object_->widget<WidgetT>(name, required, std::forward<Args>(args)...);
     if constexpr(std::is_same_v<WidgetT, form::ObjectWidget>) { return out; }
-    else { return object_.get(); }
+    else
+    {
+      return object_.get();
+    }
   }
 
   inline std::string value(const std::string & name) const { return object_->value(name); }

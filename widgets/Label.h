@@ -16,7 +16,10 @@ struct Label : public Widget
   inline void draw2D() override
   {
     if(txt_.size()) { ImGui::Text("%s %s", id.name.c_str(), txt_.c_str()); }
-    else { ImGui::Text("%s", id.name.c_str()); }
+    else
+    {
+      ImGui::Text("%s", id.name.c_str());
+    }
   }
 
 private:
