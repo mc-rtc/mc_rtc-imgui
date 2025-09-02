@@ -217,7 +217,10 @@ struct ObjectWidget : public Widget
   ObjectWidget * widget(const std::string & name, bool required, Args &&... args)
   {
     if(required || requiredOnly_) { return widget<WidgetT>(name, requiredWidgets_, std::forward<Args>(args)...); }
-    else { return widget<WidgetT>(name, otherWidgets_, std::forward<Args>(args)...); }
+    else
+    {
+      return widget<WidgetT>(name, otherWidgets_, std::forward<Args>(args)...);
+    }
   }
 
   inline ObjectWidget * parentForm() noexcept { return parentForm_; }
@@ -276,7 +279,10 @@ struct ObjectArrayWidget : public Widget
   {
     bool objects_ready = std::all_of(objects_.begin(), objects_.end(), [](const auto & w) { return w->ready(); });
     if(required_) { return objects_ready; }
-    else { return objects_.size() && objects_ready; }
+    else
+    {
+      return objects_.size() && objects_ready;
+    }
   }
 
   void draw_() override
@@ -555,7 +561,10 @@ struct SimpleInput : public Widget
       {
         if constexpr(std::is_same_v<DataT, sva::PTransformd>) { temp_ = sva::PTransformd::Identity(); }
         else if constexpr(std::is_same_v<DataT, Eigen::Vector3d>) { temp_ = Eigen::Vector3d::Zero(); }
-        else { temp_ = {}; }
+        else
+        {
+          temp_ = {};
+        }
       }
     }
   }
@@ -568,19 +577,28 @@ struct SimpleInput : public Widget
     {
       return value_.has_value() && value_.value().size() != 0;
     }
-    else { return value_.has_value(); }
+    else
+    {
+      return value_.has_value();
+    }
   }
 
   void collect(mc_rtc::Configuration & out) override
   {
     if(ready()) { out.add(name(), value_.value()); }
-    else { out.add(name(), temp_); }
+    else
+    {
+      out.add(name(), temp_);
+    }
   }
 
   std::string value() override
   {
     if constexpr(std::is_same_v<DataT, std::string>) { return value_.has_value() ? value_.value() : ""; }
-    else { return fmt::format("{}", value_.has_value() ? value_.value() : temp_); }
+    else
+    {
+      return fmt::format("{}", value_.has_value() ? value_.value() : temp_);
+    }
   }
 
   void update_(const std::optional<DataT> & value)
@@ -709,7 +727,10 @@ template<typename T>
 static inline sva::PTransformd value_or(const std::optional<T> & data)
 {
   if constexpr(std::is_same_v<T, Eigen::Vector3d>) { return {data.value_or(Eigen::Vector3d::Zero())}; }
-  else { return data.value_or(sva::PTransformd::Identity()); }
+  else
+  {
+    return data.value_or(sva::PTransformd::Identity());
+  }
 }
 
 template<typename DataT, ::mc_rtc::imgui::ControlAxis axis>
@@ -776,7 +797,10 @@ struct InteractiveMarkerInput : public SimpleInput<DataT>
       if(i == 0) { return &quat.w(); }
       else if(i == 1) { return &quat.x(); }
       else if(i == 2) { return &quat.y(); }
-      else { return &quat.z(); }
+      else
+      {
+        return &quat.z();
+      }
     };
     for(size_t i = 0; i < 4; ++i)
     {
@@ -901,7 +925,10 @@ struct ComboInput : public SimpleInput<std::string>
   {
     assert(ready());
     if(send_index_) { out.add(name(), static_cast<unsigned int>(idx_)); }
-    else { out.add(name(), value_.value()); }
+    else
+    {
+      out.add(name(), value_.value());
+    }
   }
 
   void update_(const std::vector<std::string> & values, bool send_index, int user_default = -1);
@@ -943,7 +970,10 @@ ObjectWidget * ObjectWidget::widget(const std::string & name, std::vector<form::
     widgets.push_back(std::make_unique<WidgetT>(parent_, name, std::forward<Args>(args)...));
     it = widgets.end() - 1;
   }
-  else { (*it)->template update<WidgetT>(std::forward<Args>(args)...); }
+  else
+  {
+    (*it)->template update<WidgetT>(std::forward<Args>(args)...);
+  }
   if constexpr(std::is_same_v<WidgetT, ObjectWidget>) { return static_cast<ObjectWidget *>(it->get()); }
   else if constexpr(std::is_same_v<WidgetT, ObjectArrayWidget>)
   {
@@ -954,7 +984,10 @@ ObjectWidget * ObjectWidget::widget(const std::string & name, std::vector<form::
     return static_cast<GenericArrayWidget *>(it->get())->primary();
   }
   else if constexpr(std::is_same_v<WidgetT, OneOfWidget>) { return static_cast<OneOfWidget *>(it->get())->container(); }
-  else { return this; }
+  else
+  {
+    return this;
+  }
 }
 
 } // namespace form

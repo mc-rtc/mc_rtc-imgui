@@ -18,7 +18,10 @@ inline void range_to_limits(const mc_rtc::gui::plot::Range & range,
     if(range.min == -range.inf) { limits->first = plotRange.Min; }
     if(range.max == range.inf) { limits->second = plotRange.Max; }
   }
-  else { limits = std::nullopt; }
+  else
+  {
+    limits = std::nullopt;
+  }
 }
 
 } // namespace
@@ -106,7 +109,10 @@ void Plot::do_plot()
     y_flags = ImPlotAxisFlags_NoDecorations;
     y_label = nullptr;
   }
-  else { y2_flags |= ImPlotAxisFlags_NoGridLines; }
+  else
+  {
+    y2_flags |= ImPlotAxisFlags_NoGridLines;
+  }
   const char * y2_label = y2_label_.c_str();
   if(y2_plots_ == 0)
   {

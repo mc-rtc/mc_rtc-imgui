@@ -136,7 +136,10 @@ void ArrayForm::addWidget()
                                           schema_("items")("required", std::vector<std::string>{}));
   }
   else if(type == "array") { return; }
-  else { mc_rtc::log::error("Unkown type {} in {}", type, name_); }
+  else
+  {
+    mc_rtc::log::error("Unkown type {} in {}", type, name_);
+  }
   if(widget) { widgets_.push_back(std::move(widget)); }
 }
 
@@ -171,7 +174,10 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
           widget = std::make_unique<DataComboInput>(parent, nextName, std::vector<std::string>{"robots"}, true);
           is_robot = true;
         }
-        else { widget = std::make_unique<IntegerInput>(parent, nextName, get_default<int>(p.second)); }
+        else
+        {
+          widget = std::make_unique<IntegerInput>(parent, nextName, get_default<int>(p.second));
+        }
       }
       else if(type == "number")
       {
@@ -200,7 +206,10 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
           widget = std::make_unique<DataComboInput>(
               parent, nextName, std::vector<std::string>{"frames", fmt::format("$robot##{}", name)}, false);
         }
-        else { widget = std::make_unique<StringInput>(parent, nextName, get_default<std::string>(p.second)); }
+        else
+        {
+          widget = std::make_unique<StringInput>(parent, nextName, get_default<std::string>(p.second));
+        }
       }
       else if(type == "array") { widget = std::make_unique<ArrayForm>(parent, nextName, p.second); }
       else if(type == "object")
@@ -208,7 +217,10 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
         widget = std::make_unique<ObjectForm>(parent, nextName, p.second("properties"),
                                               p.second("required", std::vector<std::string>{}));
       }
-      else { mc_rtc::log::error("Cannot handle unknown type {} for property {} in {}", type, p.first, name); }
+      else
+      {
+        mc_rtc::log::error("Cannot handle unknown type {} for property {} in {}", type, p.first, name);
+      }
     }
     if(!widget)
     {
@@ -217,7 +229,10 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
     }
     if(is_required) { required_.push_back(std::move(widget)); }
     else if(is_robot) { required_.insert(required_.begin(), std::move(widget)); }
-    else { widgets_.push_back(std::move(widget)); }
+    else
+    {
+      widgets_.push_back(std::move(widget));
+    }
   }
   std::sort(widgets_.begin(), widgets_.end(),
             [](const WidgetPtr & lhs, const WidgetPtr & rhs)
@@ -225,7 +240,10 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
               // lhs is trivial, it's "smaller" if rhs is non trivial or rhs is trivial and has a smaller name
               if(lhs->trivial()) { return !rhs->trivial() || (rhs->trivial() && lhs->fullName() < rhs->fullName()); }
               // lhs is non-trivial, it's smaller than rhs if rhs is also non-trivial and has a smaller name
-              else { return !rhs->trivial() && lhs->fullName() < rhs->fullName(); }
+              else
+              {
+                return !rhs->trivial() && lhs->fullName() < rhs->fullName();
+              }
             });
 }
 
