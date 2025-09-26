@@ -14,11 +14,17 @@ void Category::draw2D()
     {
       w->draw2D();
       ++i;
-      if(i != widgets.size()) { IndentedSeparator(); }
+      if(i != widgets.size())
+      {
+        IndentedSeparator();
+      }
       continue;
     }
     size_t j = i + 1;
-    while(j < widgets.size() && widgets[j]->id.sid == w->id.sid) { ++j; }
+    while(j < widgets.size() && widgets[j]->id.sid == w->id.sid)
+    {
+      ++j;
+    }
     ImGui::BeginTable(fmt::format("{}_table_{}", w->id.category, i).c_str(), j - i, ImGuiTableFlags_SizingStretchProp);
     for(; i < j; ++i)
     {
@@ -26,7 +32,10 @@ void Category::draw2D()
       widgets[i]->draw2D();
     }
     ImGui::EndTable();
-    if(i != widgets.size()) { IndentedSeparator(); }
+    if(i != widgets.size())
+    {
+      IndentedSeparator();
+    }
   }
   if(categories.size())
   {
@@ -52,20 +61,35 @@ void Category::draw2D()
 
 void Category::draw3D()
 {
-  for(auto & w : widgets) { w->draw3D(); }
-  for(auto & cat : categories) { cat->draw3D(); }
+  for(auto & w : widgets)
+  {
+    w->draw3D();
+  }
+  for(auto & cat : categories)
+  {
+    cat->draw3D();
+  }
 }
 
 void Category::started()
 {
-  for(auto & w : widgets) { w->seen = false; }
-  for(auto & cat : categories) { cat->started(); }
+  for(auto & w : widgets)
+  {
+    w->seen = false;
+  }
+  for(auto & cat : categories)
+  {
+    cat->started();
+  }
 }
 
 void Category::stopped()
 {
   /** Clean up categories first */
-  for(auto & cat : categories) { cat->stopped(); }
+  for(auto & cat : categories)
+  {
+    cat->stopped();
+  }
   /** Remove empty categories */
   {
     auto it = std::remove_if(categories.begin(), categories.end(),

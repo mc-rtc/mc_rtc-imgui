@@ -11,9 +11,15 @@ struct NumberInput : public SingleInput<double>
 
   ~NumberInput() override = default;
 
-  void setupBuffer() override { buffer_ = data_; }
+  void setupBuffer() override
+  {
+    buffer_ = data_;
+  }
 
-  double dataFromBuffer() override { return buffer_; }
+  double dataFromBuffer() override
+  {
+    return buffer_;
+  }
 
   inline void draw2D() override
   {

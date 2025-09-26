@@ -11,7 +11,10 @@ namespace
 template<typename T>
 std::optional<T> get_default(const mc_rtc::Configuration & conf)
 {
-  if(!conf.has("default")) { return std::nullopt; }
+  if(!conf.has("default"))
+  {
+    return std::nullopt;
+  }
   try
   {
     return conf("default");
@@ -27,8 +30,14 @@ size_t span(size_t minS, size_t maxS)
 {
   if(minS == maxS)
   {
-    if(minS == 9) { return 3; }
-    if(minS == 36) { return 6; }
+    if(minS == 9)
+    {
+      return 3;
+    }
+    if(minS == 36)
+    {
+      return 6;
+    }
   }
   return 1;
 }
@@ -37,8 +46,14 @@ template<typename T>
 T default_(size_t id, size_t minS, size_t maxS)
 {
   auto span_ = span(minS, maxS);
-  if(span_ == 1) { return 0; }
-  else if(((id - 1) % span_) == ((id - 1) / span_)) { return 1; }
+  if(span_ == 1)
+  {
+    return 0;
+  }
+  else if(((id - 1) % span_) == ((id - 1) / span_))
+  {
+    return 1;
+  }
   return 0;
 }
 
@@ -52,7 +67,10 @@ ArrayForm::ArrayForm(const ::mc_rtc::imgui::Widget & parent,
                      const mc_rtc::Configuration & schema)
 : Widget(parent, name), schema_(schema)
 {
-  if(!schema_.has("items")) { mc_rtc::log::error_and_throw<std::runtime_error>("{} is an array without items", name); }
+  if(!schema_.has("items"))
+  {
+    mc_rtc::log::error_and_throw<std::runtime_error>("{} is an array without items", name);
+  }
   auto items = schema("items");
   if(!items.has("type"))
   {
@@ -63,7 +81,10 @@ ArrayForm::ArrayForm(const ::mc_rtc::imgui::Widget & parent,
   isArrayOfArray_ = type == "array";
   minSize_ = schema("minItems", 0);
   maxSize_ = schema("maxItems", std::numeric_limits<unsigned int>::max());
-  for(size_t i = 0; i < minSize_; ++i) { addWidget(); }
+  for(size_t i = 0; i < minSize_; ++i)
+  {
+    addWidget();
+  }
 }
 
 bool ArrayForm::ready()
@@ -77,27 +98,45 @@ bool ArrayForm::ready()
 
 void ArrayForm::draw_()
 {
-  if(isArrayOfArray_) { return; }
+  if(isArrayOfArray_)
+  {
+    return;
+  }
   if(ImGui::CollapsingHeader(label(name_).c_str()))
   {
     ImGui::Indent();
     size_t removeAt = widgets_.size();
     size_t columns = (!isArrayOfObject_ && widgets_.size() >= 2 && widgets_.size() <= 7) ? widgets_.size()
                                                                                          : span(minSize_, maxSize_);
-    if(columns > 1) { ImGui::BeginTable(label("", "table").c_str(), columns, ImGuiTableFlags_SizingStretchProp); }
+    if(columns > 1)
+    {
+      ImGui::BeginTable(label("", "table").c_str(), columns, ImGuiTableFlags_SizingStretchProp);
+    }
     for(size_t i = 0; i < widgets_.size(); ++i)
     {
-      if(columns > 1) { ImGui::TableNextColumn(); }
+      if(columns > 1)
+      {
+        ImGui::TableNextColumn();
+      }
       widgets_[i]->draw();
       if(widgets_.size() > minSize_)
       {
         ImGui::SameLine();
-        if(ImGui::Button(label("-", i).c_str())) { removeAt = i; }
+        if(ImGui::Button(label("-", i).c_str()))
+        {
+          removeAt = i;
+        }
       }
     }
-    if(columns > 1) { ImGui::EndTable(); }
+    if(columns > 1)
+    {
+      ImGui::EndTable();
+    }
     removeWidget(removeAt);
-    if(widgets_.size() < maxSize_ && ImGui::Button(label("+").c_str())) { addWidget(); }
+    if(widgets_.size() < maxSize_ && ImGui::Button(label("+").c_str()))
+    {
+      addWidget();
+    }
     ImGui::Unindent();
   }
 }
@@ -120,7 +159,10 @@ void ArrayForm::addWidget()
   WidgetPtr widget;
   std::string type = schema_("items")("type");
   std::string nextName = fmt::format("##{}##{}", id_++, fullName());
-  if(type == "boolean") { widget = std::make_unique<Checkbox>(parent_, nextName, std::nullopt, false); }
+  if(type == "boolean")
+  {
+    widget = std::make_unique<Checkbox>(parent_, nextName, std::nullopt, false);
+  }
   else if(type == "integer")
   {
     widget = std::make_unique<IntegerInput>(parent_, nextName, std::nullopt, default_<int>(id_, minSize_, maxSize_));
@@ -129,20 +171,35 @@ void ArrayForm::addWidget()
   {
     widget = std::make_unique<NumberInput>(parent_, nextName, std::nullopt, default_<double>(id_, minSize_, maxSize_));
   }
-  else if(type == "string") { widget = std::make_unique<StringInput>(parent_, nextName); }
+  else if(type == "string")
+  {
+    widget = std::make_unique<StringInput>(parent_, nextName);
+  }
   else if(type == "object")
   {
     widget = std::make_unique<ObjectForm>(parent_, nextName, schema_("items")("properties"),
                                           schema_("items")("required", std::vector<std::string>{}));
   }
-  else if(type == "array") { return; }
-  else { mc_rtc::log::error("Unkown type {} in {}", type, name_); }
-  if(widget) { widgets_.push_back(std::move(widget)); }
+  else if(type == "array")
+  {
+    return;
+  }
+  else
+  {
+    mc_rtc::log::error("Unkown type {} in {}", type, name_);
+  }
+  if(widget)
+  {
+    widgets_.push_back(std::move(widget));
+  }
 }
 
 void ArrayForm::removeWidget(size_t idx)
 {
-  if(idx >= widgets_.size()) { return; }
+  if(idx >= widgets_.size())
+  {
+    return;
+  }
   widgets_.erase(widgets_.begin() + idx);
 }
 
@@ -154,16 +211,25 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
 {
   for(const auto & p : properties)
   {
-    if(p.first == "completion") { continue; }
+    if(p.first == "completion")
+    {
+      continue;
+    }
     bool is_required = std::find(required.begin(), required.end(), p.first) != required.end();
     bool is_robot = false;
     std::unique_ptr<form::Widget> widget;
     std::string nextName = fmt::format("{}##{}", p.first, name);
-    if(p.second.has("enum")) { widget = std::make_unique<ComboInput>(parent, nextName, p.second("enum"), false); }
+    if(p.second.has("enum"))
+    {
+      widget = std::make_unique<ComboInput>(parent, nextName, p.second("enum"), false);
+    }
     else
     {
       std::string type = p.second("type", std::string(""));
-      if(type == "boolean") { widget = std::make_unique<Checkbox>(parent, nextName, get_default<bool>(p.second)); }
+      if(type == "boolean")
+      {
+        widget = std::make_unique<Checkbox>(parent, nextName, get_default<bool>(p.second));
+      }
       else if(type == "integer")
       {
         if(p.first == "robotIndex")
@@ -171,7 +237,10 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
           widget = std::make_unique<DataComboInput>(parent, nextName, std::vector<std::string>{"robots"}, true);
           is_robot = true;
         }
-        else { widget = std::make_unique<IntegerInput>(parent, nextName, get_default<int>(p.second)); }
+        else
+        {
+          widget = std::make_unique<IntegerInput>(parent, nextName, get_default<int>(p.second));
+        }
       }
       else if(type == "number")
       {
@@ -200,32 +269,56 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
           widget = std::make_unique<DataComboInput>(
               parent, nextName, std::vector<std::string>{"frames", fmt::format("$robot##{}", name)}, false);
         }
-        else { widget = std::make_unique<StringInput>(parent, nextName, get_default<std::string>(p.second)); }
+        else
+        {
+          widget = std::make_unique<StringInput>(parent, nextName, get_default<std::string>(p.second));
+        }
       }
-      else if(type == "array") { widget = std::make_unique<ArrayForm>(parent, nextName, p.second); }
+      else if(type == "array")
+      {
+        widget = std::make_unique<ArrayForm>(parent, nextName, p.second);
+      }
       else if(type == "object")
       {
         widget = std::make_unique<ObjectForm>(parent, nextName, p.second("properties"),
                                               p.second("required", std::vector<std::string>{}));
       }
-      else { mc_rtc::log::error("Cannot handle unknown type {} for property {} in {}", type, p.first, name); }
+      else
+      {
+        mc_rtc::log::error("Cannot handle unknown type {} for property {} in {}", type, p.first, name);
+      }
     }
     if(!widget)
     {
       mc_rtc::log::error("Failed to load a widget for property {} in {}", p.first, name);
       continue;
     }
-    if(is_required) { required_.push_back(std::move(widget)); }
-    else if(is_robot) { required_.insert(required_.begin(), std::move(widget)); }
-    else { widgets_.push_back(std::move(widget)); }
+    if(is_required)
+    {
+      required_.push_back(std::move(widget));
+    }
+    else if(is_robot)
+    {
+      required_.insert(required_.begin(), std::move(widget));
+    }
+    else
+    {
+      widgets_.push_back(std::move(widget));
+    }
   }
   std::sort(widgets_.begin(), widgets_.end(),
             [](const WidgetPtr & lhs, const WidgetPtr & rhs)
             {
               // lhs is trivial, it's "smaller" if rhs is non trivial or rhs is trivial and has a smaller name
-              if(lhs->trivial()) { return !rhs->trivial() || (rhs->trivial() && lhs->fullName() < rhs->fullName()); }
+              if(lhs->trivial())
+              {
+                return !rhs->trivial() || (rhs->trivial() && lhs->fullName() < rhs->fullName());
+              }
               // lhs is non-trivial, it's smaller than rhs if rhs is also non-trivial and has a smaller name
-              else { return !rhs->trivial() && lhs->fullName() < rhs->fullName(); }
+              else
+              {
+                return !rhs->trivial() && lhs->fullName() < rhs->fullName();
+              }
             });
 }
 
@@ -238,11 +331,17 @@ void ObjectForm::draw(bool show_header)
 {
   if(!show_header || ImGui::CollapsingHeader(label(name_).c_str()))
   {
-    if(show_header) { ImGui::Indent(); }
+    if(show_header)
+    {
+      ImGui::Indent();
+    }
     for(size_t i = 0; i < required_.size(); ++i)
     {
       required_[i]->draw();
-      if(i + 1 != required_.size()) { IndentedSeparator(); }
+      if(i + 1 != required_.size())
+      {
+        IndentedSeparator();
+      }
     }
     if(widgets_.size() && ImGui::CollapsingHeader(label("Optional fields").c_str()))
     {
@@ -250,21 +349,33 @@ void ObjectForm::draw(bool show_header)
       for(size_t i = 0; i < widgets_.size(); ++i)
       {
         widgets_[i]->draw();
-        if(i + 1 != widgets_.size()) { IndentedSeparator(); }
+        if(i + 1 != widgets_.size())
+        {
+          IndentedSeparator();
+        }
       }
       ImGui::Unindent();
     }
-    if(show_header) { ImGui::Unindent(); }
+    if(show_header)
+    {
+      ImGui::Unindent();
+    }
   }
 }
 
 void ObjectForm::collect(mc_rtc::Configuration & out)
 {
   assert(ready());
-  for(auto & w : required_) { w->collect(out); }
+  for(auto & w : required_)
+  {
+    w->collect(out);
+  }
   for(auto & w : widgets_)
   {
-    if(w->ready()) { w->collect(out); }
+    if(w->ready())
+    {
+      w->collect(out);
+    }
   }
 }
 
@@ -279,14 +390,20 @@ std::optional<std::string> ObjectForm::value(const std::string & name) const
   {
     for(const auto & w : widgets)
     {
-      if(w->fullName() == name) { return w->value(); }
+      if(w->fullName() == name)
+      {
+        return w->value();
+      }
       else
       {
         auto obj = dynamic_cast<const ObjectForm *>(w.get());
         if(obj)
         {
           auto value = obj->value(name);
-          if(value) { return value; }
+          if(value)
+          {
+            return value;
+          }
         }
       }
     }

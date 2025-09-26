@@ -66,14 +66,17 @@ void Client::draw2D(ImVec2 windowSize)
       for(auto & p : active_plots_)
       {
         auto tab_id = fmt::format("{}##{}", p.second->title(), id++);
-        enable_bold_font();
+        ImGui::PushFont(bold_font_);
         if(ImGui::BeginTabItem(tab_id.c_str()))
         {
-          disable_bold_font();
+          ImGui::PopFont();
           p.second->do_plot();
           ImGui::EndTabItem();
         }
-        else { disable_bold_font(); }
+        else
+        {
+          ImGui::PopFont();
+        }
       }
       for(auto it = inactive_plots_.begin(); it != inactive_plots_.end();)
       {
@@ -90,7 +93,10 @@ void Client::draw2D(ImVec2 windowSize)
       ImGui::EndTabBar();
     }
     ImGui::End();
-    if(!open_plots) { inactive_plots_.clear(); }
+    if(!open_plots)
+    {
+      inactive_plots_.clear();
+    }
   }
 }
 
@@ -114,7 +120,10 @@ void Client::stopped()
       inactive_plots_.push_back(it->second);
       it = active_plots_.erase(it);
     }
-    else { ++it; }
+    else
+    {
+      ++it;
+    }
   }
 }
 
@@ -122,16 +131,6 @@ void Client::clear()
 {
   root_.categories.clear();
   root_.widgets.clear();
-}
-
-void Client::enable_bold_font()
-{
-  if(bold_font_) { ImGui::PushFont(bold_font_); }
-}
-
-void Client::disable_bold_font()
-{
-  if(bold_font_) { ImGui::PopFont(); }
 }
 
 /** We rely on widgets to create categories */
@@ -209,155 +208,87 @@ void Client::table_end(const ElementId & id)
 
 void Client::form(const ElementId & id)
 {
-  active_form_ = widget<Form>(id).parentForm();
+  widget<Form>(id);
 }
 
 template<typename T>
 std::optional<T> null_or_default(const T & value, bool user_default)
 {
-  if(user_default) { return value; }
+  if(user_default)
+  {
+    return value;
+  }
   return std::nullopt;
 }
 
-void Client::form_checkbox(const ElementId & /*id*/,
+void Client::form_checkbox(const ElementId & id,
                            const std::string & name,
                            bool required,
                            bool default_,
                            bool user_default)
 {
-  active_form_->widget<form::Checkbox>(name, required, null_or_default(default_, user_default));
+  widget<Form>(id).widget<form::Checkbox>(name, required, null_or_default(default_, user_default));
 }
 
-void Client::form_integer_input(const ElementId & /*id*/,
+void Client::form_integer_input(const ElementId & id,
                                 const std::string & name,
                                 bool required,
                                 int default_,
                                 bool user_default)
 {
-  active_form_->widget<form::IntegerInput>(name, required, null_or_default(default_, user_default));
+  widget<Form>(id).widget<form::IntegerInput>(name, required, null_or_default(default_, user_default));
 }
 
-void Client::form_number_input(const ElementId & /*id*/,
+void Client::form_number_input(const ElementId & id,
                                const std::string & name,
                                bool required,
                                double default_,
                                bool user_default)
 {
-  active_form_->widget<form::NumberInput>(name, required, null_or_default(default_, user_default));
+  widget<Form>(id).widget<form::NumberInput>(name, required, null_or_default(default_, user_default));
 }
 
-void Client::form_string_input(const ElementId & /*id*/,
+void Client::form_string_input(const ElementId & id,
                                const std::string & name,
                                bool required,
                                const std::string & default_,
                                bool user_default)
 {
-  active_form_->widget<form::StringInput>(name, required, null_or_default(default_, user_default));
+  widget<Form>(id).widget<form::StringInput>(name, required, null_or_default(default_, user_default));
 }
 
-void Client::form_array_input(const ElementId & /*id*/,
+void Client::form_array_input(const ElementId & id,
                               const std::string & name,
                               bool required,
-                              const std::vector<std::string> & labels,
                               const Eigen::VectorXd & default_,
                               bool fixed_size,
                               bool user_default)
 {
-  active_form_->widget<form::ArrayInput>(name, required, labels, null_or_default(default_, user_default), fixed_size);
+  widget<Form>(id).widget<form::ArrayInput>(name, required, null_or_default(default_, user_default), fixed_size);
 }
 
-void Client::form_point3d_input(const ElementId & /*id*/,
-                                const std::string & name,
-                                bool required,
-                                const Eigen::Vector3d & default_,
-                                bool user_default,
-                                bool interactive)
-{
-  active_form_->widget<form::Point3DInput>(name, required, null_or_default(default_, user_default), interactive);
-}
-
-void Client::form_rotation_input(const ElementId & /*id*/,
-                                 const std::string & name,
-                                 bool required,
-                                 const sva::PTransformd & default_,
-                                 bool user_default,
-                                 bool interactive)
-{
-  active_form_->widget<form::RotationInput>(name, required, null_or_default(default_, user_default), interactive);
-}
-
-void Client::form_transform_input(const ElementId & /*id*/,
-                                  const std::string & name,
-                                  bool required,
-                                  const sva::PTransformd & default_,
-                                  bool user_default,
-                                  bool interactive)
-{
-  active_form_->widget<form::TransformInput>(name, required, null_or_default(default_, user_default), interactive);
-}
-
-void Client::form_combo_input(const ElementId & /*id*/,
+void Client::form_combo_input(const ElementId & id,
                               const std::string & name,
                               bool required,
                               const std::vector<std::string> & values,
                               bool send_index,
                               int user_default)
 {
-  active_form_->widget<form::ComboInput>(name, required, values, send_index, user_default);
+  widget<Form>(id).widget<form::ComboInput>(name, required, values, send_index, user_default);
 }
 
-void Client::form_data_combo_input(const ElementId & /*id*/,
+void Client::form_data_combo_input(const ElementId & id,
                                    const std::string & name,
                                    bool required,
                                    const std::vector<std::string> & ref,
                                    bool send_index)
 {
-  active_form_->widget<form::DataComboInput>(name, required, ref, send_index);
+  widget<Form>(id).widget<form::DataComboInput>(name, required, ref, send_index);
 }
 
 void Client::schema(const ElementId & id, const std::string & schema)
 {
   widget<Schema>(id).data(schema);
-}
-
-void Client::start_form_object_input(const std::string & name, bool required)
-{
-  require_active_form();
-  active_form_ = active_form_->widget<form::ObjectWidget>(name, required, active_form_);
-}
-
-void Client::end_form_object_input()
-{
-  require_active_form();
-  active_form_ = active_form_->parentForm();
-}
-
-void Client::start_form_generic_array_input(const std::string & name,
-                                            bool required,
-                                            std::optional<std::vector<mc_rtc::Configuration>> data)
-{
-  require_active_form();
-  active_form_ = active_form_->widget<form::GenericArrayWidget>(name, required, required, active_form_, data);
-}
-
-void Client::end_form_generic_array_input()
-{
-  require_active_form();
-  active_form_ = active_form_->parentForm();
-}
-
-void Client::start_form_one_of_input(const std::string & name,
-                                     bool required,
-                                     const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data)
-{
-  require_active_form();
-  active_form_ = active_form_->widget<form::OneOfWidget>(name, required, active_form_, data);
-}
-
-void Client::end_form_one_of_input()
-{
-  require_active_form();
-  active_form_ = active_form_->parentForm();
 }
 
 auto Client::getCategory(const std::vector<std::string> & category) -> Category &
@@ -368,15 +299,24 @@ auto Client::getCategory(const std::vector<std::string> & category) -> Category 
     auto & cat = out.get();
     auto & next = category[i];
     auto it = std::find_if(cat.categories.begin(), cat.categories.end(), [&](auto & c) { return c->name == next; });
-    if(it != cat.categories.end()) { out = std::ref(*it->get()); }
-    else { out = *cat.categories.emplace_back(std::make_unique<Category>(next, cat.depth + 1)); }
+    if(it != cat.categories.end())
+    {
+      out = std::ref(*it->get());
+    }
+    else
+    {
+      out = *cat.categories.emplace_back(std::make_unique<Category>(next, cat.depth + 1));
+    }
   }
   return out.get();
 }
 
 void Client::start_plot(uint64_t id, const std::string & title)
 {
-  if(!active_plots_.count(id)) { active_plots_[id] = std::make_shared<Plot>(title); }
+  if(!active_plots_.count(id))
+  {
+    active_plots_[id] = std::make_shared<Plot>(title);
+  }
   if(active_plots_[id]->title() != title)
   {
     inactive_plots_.push_back(active_plots_[id]);
@@ -432,7 +372,5 @@ void Client::plot_polygons(uint64_t id,
 }
 
 void Client::end_plot(uint64_t) {}
-
-InteractiveMarker::~InteractiveMarker() {}
 
 } // namespace mc_rtc::imgui

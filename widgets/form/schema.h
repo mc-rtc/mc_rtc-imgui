@@ -12,17 +12,16 @@ struct ArrayForm : public Widget
 {
   ArrayForm(const ::mc_rtc::imgui::Widget & parent, const std::string & name, const mc_rtc::Configuration & schema);
 
-  WidgetPtr clone(ObjectWidget *) const override { mc_rtc::log::error_and_throw("ArrayForm cannot be cloned"); }
-
-  void update(const mc_rtc::Configuration &) override { mc_rtc::log::error_and_throw("Not updated for ArrayForm"); }
-
   bool ready() override;
 
   void draw_() override;
 
   void collect(mc_rtc::Configuration & out) override;
 
-  inline bool trivial() const override { return false; }
+  inline bool trivial() const override
+  {
+    return false;
+  }
 
 protected:
   mc_rtc::Configuration schema_;
@@ -45,10 +44,6 @@ struct ObjectForm : public Widget
              const std::map<std::string, mc_rtc::Configuration> & properties,
              const std::vector<std::string> & required);
 
-  WidgetPtr clone(ObjectWidget *) const override { mc_rtc::log::error_and_throw("ObjectForm cannot be cloned"); }
-
-  void update(const mc_rtc::Configuration &) override { mc_rtc::log::error_and_throw("Not updated for ArrayForm"); }
-
   bool ready() override;
 
   void draw(bool show_header);
@@ -61,7 +56,10 @@ struct ObjectForm : public Widget
 
   std::optional<std::string> value(const std::string & name) const;
 
-  inline bool trivial() const override { return false; }
+  inline bool trivial() const override
+  {
+    return false;
+  }
 
 protected:
   std::vector<WidgetPtr> required_;

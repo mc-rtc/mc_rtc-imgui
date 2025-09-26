@@ -19,7 +19,10 @@ struct Category
   std::vector<WidgetPtr> widgets;
   std::vector<CategoryPtr> categories;
 
-  inline bool empty() const { return widgets.size() == 0 && categories.size() == 0; }
+  inline bool empty() const
+  {
+    return widgets.size() == 0 && categories.size() == 0;
+  }
 
   void draw2D();
   void draw3D();

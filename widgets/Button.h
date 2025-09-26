@@ -13,7 +13,10 @@ struct Button : public Widget
 
   inline void draw2D() override
   {
-    if(ImGui::Button(label(id.name).c_str())) { client.send_request(id); }
+    if(ImGui::Button(label(id.name).c_str()))
+    {
+      client.send_request(id);
+    }
   }
 };
 

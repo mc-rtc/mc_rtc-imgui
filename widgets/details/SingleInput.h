@@ -14,7 +14,10 @@ struct SingleInput : public Widget
 
   inline void data(const DataT & data)
   {
-    if(!busy_) { data_ = data; }
+    if(!busy_)
+    {
+      data_ = data;
+    }
   }
 
   virtual void setupBuffer() {}

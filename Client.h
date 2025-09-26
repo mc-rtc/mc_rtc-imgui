@@ -1,19 +1,10 @@
 #pragma once
 
 #include "Category.h"
-#include "InteractiveMarker.h"
 #include "Plot.h"
 
 namespace mc_rtc::imgui
 {
-
-namespace form
-{
-
-struct ObjectWidget;
-struct OneOfWidget;
-
-} // namespace form
 
 struct Client : public mc_control::ControllerClient
 {
@@ -23,10 +14,6 @@ struct Client : public mc_control::ControllerClient
    * address
    */
   Client();
-
-  /** Creates a new interactive marker */
-  virtual InteractiveMarkerPtr make_marker(const sva::PTransformd & pose = sva::PTransformd::Identity(),
-                                           ControlAxis mask = ControlAxis::NONE) = 0;
 
   /** Update the client data from the latest server message */
   void update();
@@ -40,13 +27,15 @@ struct Client : public mc_control::ControllerClient
   /** Remove all elements */
   void clear();
 
-  inline const mc_rtc::Configuration & data() const noexcept { return data_; }
+  inline const mc_rtc::Configuration & data() const noexcept
+  {
+    return data_;
+  }
 
-  inline void set_bold_font(ImFont * font) { bold_font_ = font; }
-
-  void enable_bold_font();
-
-  void disable_bold_font();
+  inline void set_bold_font(ImFont * font)
+  {
+    bold_font_ = font;
+  }
 
 protected:
   std::vector<char> buffer_ = std::vector<char>(65535);
@@ -122,31 +111,9 @@ protected:
   void form_array_input(const ElementId & formId,
                         const std::string & name,
                         bool required,
-                        const std::vector<std::string> & labels,
                         const Eigen::VectorXd & default_,
                         bool fixed_size,
                         bool user_default) override;
-
-  void form_point3d_input(const ElementId & formId,
-                          const std::string & name,
-                          bool requried,
-                          const Eigen::Vector3d & default_,
-                          bool user_default,
-                          bool interactive) override;
-
-  void form_rotation_input(const ElementId & formId,
-                           const std::string & name,
-                           bool requried,
-                           const sva::PTransformd & default_,
-                           bool user_default,
-                           bool interactive) override;
-
-  void form_transform_input(const ElementId & formId,
-                            const std::string & name,
-                            bool requried,
-                            const sva::PTransformd & default_,
-                            bool user_default,
-                            bool interactive) override;
 
   void form_combo_input(const ElementId & formId,
                         const std::string & name,
@@ -160,22 +127,6 @@ protected:
                              bool required,
                              const std::vector<std::string> & ref,
                              bool send_index) override;
-
-  void start_form_object_input(const std::string & name, bool required) override;
-
-  void end_form_object_input() override;
-
-  void start_form_generic_array_input(const std::string & name,
-                                      bool required,
-                                      std::optional<std::vector<mc_rtc::Configuration>> data) override;
-
-  void end_form_generic_array_input() override;
-
-  void start_form_one_of_input(const std::string & name,
-                               bool required,
-                               const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data) override;
-
-  void end_form_one_of_input() override;
 
   void start_plot(uint64_t id, const std::string & title) override;
 
@@ -214,15 +165,6 @@ protected:
 
   /** Returns a category (creates it if it does not exist */
   Category & getCategory(const std::vector<std::string> & category);
-
-  /** Currently active form */
-  form::ObjectWidget * active_form_ = nullptr;
-
-  /** Throw if active_form is not set */
-  inline void require_active_form()
-  {
-    if(!active_form_) { mc_rtc::log::error_and_throw("No active form at this point"); }
-  }
 
   /** Currently active plots */
   std::unordered_map<uint64_t, std::shared_ptr<Plot>> active_plots_;
