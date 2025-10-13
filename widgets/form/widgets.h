@@ -49,6 +49,7 @@ struct Widget
 
   void draw()
   {
+    if(hidden_) return;
     parent_.client.enable_bold_font();
     ImGui::Text("%s", name().c_str());
     parent_.client.disable_bold_font();
@@ -102,6 +103,9 @@ struct Widget
 
   virtual void update(const mc_rtc::Configuration &) = 0;
 
+  void hidden(bool hidden) { hidden_ = hidden; }
+  bool hidden() const noexcept { return hidden_; }
+
 protected:
   const ::mc_rtc::imgui::Widget & parent_;
   std::string name_;
@@ -110,6 +114,7 @@ protected:
   uint64_t id_ = 0;
   inline static uint64_t next_id_ = 0;
   bool locked_ = false;
+  bool hidden_ = false;
 };
 
 struct ObjectWidget : public Widget
