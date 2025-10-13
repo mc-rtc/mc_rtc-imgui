@@ -167,7 +167,11 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
     std::unique_ptr<form::Widget> widget;
     std::string nextName = fmt::format("{}##{}", p.first, name);
     if(p.second.has("enum")) { widget = std::make_unique<ComboInput>(parent, nextName, p.second("enum"), false); }
-    else if(p.second.has("const")) { widget = std::make_unique<StringInput>(parent, nextName, p.second("const")); widget->hidden(true); }
+    else if(p.second.has("const"))
+    {
+      widget = std::make_unique<StringInput>(parent, nextName, p.second("const"));
+      widget->hidden(true);
+    }
     else
     {
       std::string type = p.second("type", std::string(""));
