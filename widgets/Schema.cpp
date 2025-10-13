@@ -40,17 +40,6 @@ inline bfs::path canonical(const bfs::path & p)
 namespace
 {
 
-std::string removeFakeDir(const std::string & in)
-{
-  std::string_view fakeDir = "/../";
-  if(in.size() >= fakeDir.size() && in.substr(0, fakeDir.size()) == fakeDir) { return in.substr(fakeDir.size()); }
-  if(in.size() >= fakeDir.size() && in.substr(0, fakeDir.size() - 1) == fakeDir.substr(1))
-  {
-    return in.substr(fakeDir.size() - 1);
-  }
-  return in;
-}
-
 void resolveRef(const bfs::path & path,
                 mc_rtc::Configuration conf,
                 const std::function<mc_rtc::Configuration(const bfs::path &)> & loadFn)
@@ -66,7 +55,7 @@ void resolveRef(const bfs::path & path,
     {
       if(k == "$ref")
       {
-        auto ref = loadFn(details::canonical(path.parent_path() / removeFakeDir(conf(k)).c_str()));
+        auto ref = loadFn(details::canonical(path.parent_path() / static_cast<std::string>(conf(k))));
         auto refKeys = ref.keys();
         for(const auto & rk : refKeys)
         {
