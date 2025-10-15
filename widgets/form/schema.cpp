@@ -54,6 +54,13 @@ ArrayForm::ArrayForm(const ::mc_rtc::imgui::Widget & parent,
 {
   if(!schema_.has("items")) { mc_rtc::log::error_and_throw<std::runtime_error>("{} is an array without items", name); }
   auto items = schema("items");
+  if(items.has("oneOf"))
+  {
+    // XXX: merge only the first item type
+    // we should implement a OneOfArrayForm to handle multiple possible types
+    mc_rtc::log::warning("{} is an array with oneOf, only the first item is considered", name);
+    items.load(items("oneOf")[0]);
+  }
   if(!items.has("type"))
   {
     mc_rtc::log::error_and_throw<std::runtime_error>("{} is an array without items' type", name);
@@ -163,6 +170,11 @@ ObjectForm::ObjectForm(const ::mc_rtc::imgui::Widget & parent,
     std::unique_ptr<form::Widget> widget;
     std::string nextName = fmt::format("{}##{}", p.first, name);
     if(p.second.has("enum")) { widget = std::make_unique<ComboInput>(parent, nextName, p.second("enum"), false); }
+    else if(p.second.has("const"))
+    {
+      widget = std::make_unique<StringInput>(parent, nextName, p.second("const"));
+      widget->hidden(true);
+    }
     else
     {
       std::string type = p.second("type", std::string(""));
