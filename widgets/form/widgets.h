@@ -602,7 +602,7 @@ struct SimpleInput : public Widget
     if constexpr(std::is_same_v<DataT, std::string>) { return value_.has_value() ? value_.value() : ""; }
     else
     {
-      return fmt::format("{}", value_.has_value() ? value_.value() : temp_);
+      return fmt::format("{}", fmt::streamed(value_.has_value() ? value_.value() : temp_));
     }
   }
 
