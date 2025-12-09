@@ -602,11 +602,11 @@ struct SimpleInput : public Widget
     if constexpr(std::is_same_v<DataT, std::string>) { return value_.has_value() ? value_.value() : ""; }
     else
     {
-      #if FMT_VERSION >= 9 * 10000
-        return fmt::format("{}", fmt::streamed(value_.has_value() ? value_.value() : temp_));
-      #else
-        return fmt::format("{}", value_.has_value() ? value_.value() : temp_);
-      #endif
+#if FMT_VERSION >= 9 * 10000
+      return fmt::format("{}", fmt::streamed(value_.has_value() ? value_.value() : temp_));
+#else
+      return fmt::format("{}", value_.has_value() ? value_.value() : temp_);
+#endif
     }
   }
 
