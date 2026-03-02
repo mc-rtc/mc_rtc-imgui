@@ -299,9 +299,7 @@ void ObjectForm::collect(mc_rtc::Configuration & out)
 }
 
 void ObjectForm::draw_()
-{
-  draw(true);
-}
+{ draw(true); }
 
 std::optional<std::string> ObjectForm::value(const std::string & name) const
 {
