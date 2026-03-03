@@ -29,9 +29,7 @@ Client::Client() : mc_control::ControllerClient()
 }
 
 void Client::update()
-{
-  run(buffer_, t_last_);
-}
+{ run(buffer_, t_last_); }
 
 void Client::draw2D(ImVec2 windowSize)
 {
@@ -96,14 +94,10 @@ void Client::draw2D(ImVec2 windowSize)
 }
 
 void Client::draw3D()
-{
-  root_.draw3D();
-}
+{ root_.draw3D(); }
 
 void Client::started()
-{
-  root_.started();
-}
+{ root_.started(); }
 
 void Client::stopped()
 {
@@ -142,79 +136,49 @@ void Client::disable_bold_font()
 void Client::category(const std::vector<std::string> &, const std::string &) {}
 
 void Client::label(const ElementId & id, const std::string & txt)
-{
-  widget<Label>(id).data(txt);
-}
+{ widget<Label>(id).data(txt); }
 
 void Client::array_label(const ElementId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & data)
-{
-  widget<ArrayLabel>(id).data(labels, data);
-}
+{ widget<ArrayLabel>(id).data(labels, data); }
 
 void Client::button(const ElementId & id)
-{
-  widget<Button>(id);
-}
+{ widget<Button>(id); }
 
 void Client::checkbox(const ElementId & id, bool state)
-{
-  widget<Checkbox>(id).data(state);
-}
+{ widget<Checkbox>(id).data(state); }
 
 void Client::string_input(const ElementId & id, const std::string & data)
-{
-  widget<StringInput>(id).data(data);
-}
+{ widget<StringInput>(id).data(data); }
 
 void Client::integer_input(const ElementId & id, int data)
-{
-  widget<IntegerInput>(id).data(data);
-}
+{ widget<IntegerInput>(id).data(data); }
 
 void Client::number_input(const ElementId & id, double data)
-{
-  widget<NumberInput>(id).data(data);
-}
+{ widget<NumberInput>(id).data(data); }
 
 void Client::number_slider(const ElementId & id, double data, double min, double max)
-{
-  widget<NumberSlider>(id).data(data, min, max);
-}
+{ widget<NumberSlider>(id).data(data, min, max); }
 
 void Client::array_input(const ElementId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & data)
-{
-  widget<ArrayInput>(id).data(labels, data);
-}
+{ widget<ArrayInput>(id).data(labels, data); }
 
 void Client::combo_input(const ElementId & id, const std::vector<std::string> & values, const std::string & data)
-{
-  widget<ComboInput>(id).data(values, data);
-}
+{ widget<ComboInput>(id).data(values, data); }
 
 void Client::data_combo_input(const ElementId & id, const std::vector<std::string> & values, const std::string & data)
-{
-  widget<DataComboInput>(id).data(values, data);
-}
+{ widget<DataComboInput>(id).data(values, data); }
 
 void Client::table_start(const ElementId & id, const std::vector<std::string> & header)
-{
-  widget<Table>(id).start(header);
-}
+{ widget<Table>(id).start(header); }
 
 void Client::table_row(const ElementId & id, const std::vector<std::string> & data)
-{
-  widget<Table>(id).row(data);
-}
+{ widget<Table>(id).row(data); }
 
 void Client::table_end(const ElementId & id)
-{
-  widget<Table>(id).end();
-}
+{ widget<Table>(id).end(); }
 
 void Client::form(const ElementId & id)
-{
-  active_form_ = widget<Form>(id).parentForm();
-}
+{ active_form_ = widget<Form>(id).parentForm(); }
 
 template<typename T>
 std::optional<T> null_or_default(const T & value, bool user_default)
@@ -228,36 +192,28 @@ void Client::form_checkbox(const ElementId & /*id*/,
                            bool required,
                            bool default_,
                            bool user_default)
-{
-  active_form_->widget<form::Checkbox>(name, required, null_or_default(default_, user_default));
-}
+{ active_form_->widget<form::Checkbox>(name, required, null_or_default(default_, user_default)); }
 
 void Client::form_integer_input(const ElementId & /*id*/,
                                 const std::string & name,
                                 bool required,
                                 int default_,
                                 bool user_default)
-{
-  active_form_->widget<form::IntegerInput>(name, required, null_or_default(default_, user_default));
-}
+{ active_form_->widget<form::IntegerInput>(name, required, null_or_default(default_, user_default)); }
 
 void Client::form_number_input(const ElementId & /*id*/,
                                const std::string & name,
                                bool required,
                                double default_,
                                bool user_default)
-{
-  active_form_->widget<form::NumberInput>(name, required, null_or_default(default_, user_default));
-}
+{ active_form_->widget<form::NumberInput>(name, required, null_or_default(default_, user_default)); }
 
 void Client::form_string_input(const ElementId & /*id*/,
                                const std::string & name,
                                bool required,
                                const std::string & default_,
                                bool user_default)
-{
-  active_form_->widget<form::StringInput>(name, required, null_or_default(default_, user_default));
-}
+{ active_form_->widget<form::StringInput>(name, required, null_or_default(default_, user_default)); }
 
 void Client::form_array_input(const ElementId & /*id*/,
                               const std::string & name,
@@ -266,9 +222,7 @@ void Client::form_array_input(const ElementId & /*id*/,
                               const Eigen::VectorXd & default_,
                               bool fixed_size,
                               bool user_default)
-{
-  active_form_->widget<form::ArrayInput>(name, required, labels, null_or_default(default_, user_default), fixed_size);
-}
+{ active_form_->widget<form::ArrayInput>(name, required, labels, null_or_default(default_, user_default), fixed_size); }
 
 void Client::form_point3d_input(const ElementId & /*id*/,
                                 const std::string & name,
@@ -276,9 +230,7 @@ void Client::form_point3d_input(const ElementId & /*id*/,
                                 const Eigen::Vector3d & default_,
                                 bool user_default,
                                 bool interactive)
-{
-  active_form_->widget<form::Point3DInput>(name, required, null_or_default(default_, user_default), interactive);
-}
+{ active_form_->widget<form::Point3DInput>(name, required, null_or_default(default_, user_default), interactive); }
 
 void Client::form_rotation_input(const ElementId & /*id*/,
                                  const std::string & name,
@@ -286,9 +238,7 @@ void Client::form_rotation_input(const ElementId & /*id*/,
                                  const sva::PTransformd & default_,
                                  bool user_default,
                                  bool interactive)
-{
-  active_form_->widget<form::RotationInput>(name, required, null_or_default(default_, user_default), interactive);
-}
+{ active_form_->widget<form::RotationInput>(name, required, null_or_default(default_, user_default), interactive); }
 
 void Client::form_transform_input(const ElementId & /*id*/,
                                   const std::string & name,
@@ -296,9 +246,7 @@ void Client::form_transform_input(const ElementId & /*id*/,
                                   const sva::PTransformd & default_,
                                   bool user_default,
                                   bool interactive)
-{
-  active_form_->widget<form::TransformInput>(name, required, null_or_default(default_, user_default), interactive);
-}
+{ active_form_->widget<form::TransformInput>(name, required, null_or_default(default_, user_default), interactive); }
 
 void Client::form_combo_input(const ElementId & /*id*/,
                               const std::string & name,
@@ -306,23 +254,17 @@ void Client::form_combo_input(const ElementId & /*id*/,
                               const std::vector<std::string> & values,
                               bool send_index,
                               int user_default)
-{
-  active_form_->widget<form::ComboInput>(name, required, values, send_index, user_default);
-}
+{ active_form_->widget<form::ComboInput>(name, required, values, send_index, user_default); }
 
 void Client::form_data_combo_input(const ElementId & /*id*/,
                                    const std::string & name,
                                    bool required,
                                    const std::vector<std::string> & ref,
                                    bool send_index)
-{
-  active_form_->widget<form::DataComboInput>(name, required, ref, send_index);
-}
+{ active_form_->widget<form::DataComboInput>(name, required, ref, send_index); }
 
 void Client::schema(const ElementId & id, const std::string & schema)
-{
-  widget<Schema>(id).data(schema);
-}
+{ widget<Schema>(id).data(schema); }
 
 void Client::start_form_object_input(const std::string & name, bool required)
 {
@@ -394,19 +336,13 @@ void Client::start_plot(uint64_t id, const std::string & title)
 }
 
 void Client::plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
-{
-  active_plots_[id]->setup_xaxis(legend, range);
-}
+{ active_plots_[id]->setup_xaxis(legend, range); }
 
 void Client::plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
-{
-  active_plots_[id]->setup_yaxis_left(legend, range);
-}
+{ active_plots_[id]->setup_yaxis_left(legend, range); }
 
 void Client::plot_setup_yaxis_right(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
-{
-  active_plots_[id]->setup_yaxis_right(legend, range);
-}
+{ active_plots_[id]->setup_yaxis_right(legend, range); }
 
 void Client::plot_point(uint64_t id,
                         uint64_t did,
@@ -416,27 +352,21 @@ void Client::plot_point(uint64_t id,
                         mc_rtc::gui::Color color,
                         mc_rtc::gui::plot::Style style,
                         mc_rtc::gui::plot::Side side)
-{
-  active_plots_[id]->plot_point(did, legend, x, y, color, style, side);
-}
+{ active_plots_[id]->plot_point(did, legend, x, y, color, style, side); }
 
 void Client::plot_polygon(uint64_t id,
                           uint64_t did,
                           const std::string & legend,
                           const mc_rtc::gui::plot::PolygonDescription & polygon,
                           mc_rtc::gui::plot::Side side)
-{
-  active_plots_[id]->plot_polygon(did, legend, polygon, side);
-}
+{ active_plots_[id]->plot_polygon(did, legend, polygon, side); }
 
 void Client::plot_polygons(uint64_t id,
                            uint64_t did,
                            const std::string & legend,
                            const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygons,
                            mc_rtc::gui::plot::Side side)
-{
-  active_plots_[id]->plot_polygons(did, legend, polygons, side);
-}
+{ active_plots_[id]->plot_polygons(did, legend, polygons, side); }
 
 void Client::end_plot(uint64_t) {}
 

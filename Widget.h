@@ -40,19 +40,13 @@ struct Widget
   virtual void draw3D() {}
 
   inline std::string label(std::string_view label, std::string_view extra = "")
-  {
-    return fmt::format("{}##{}{}{}", label, id.category, id.name, extra);
-  }
+  { return fmt::format("{}##{}{}{}", label, id.category, id.name, extra); }
 
   inline std::string label(std::string_view label, int i)
-  {
-    return fmt::format("{}##{}{}{}", label, id.category, id.name, i);
-  }
+  { return fmt::format("{}##{}{}{}", label, id.category, id.name, i); }
 
   inline std::string label(std::string_view label, size_t i)
-  {
-    return fmt::format("{}##{}{}{}", label, id.category, id.name, i);
-  }
+  { return fmt::format("{}##{}{}{}", label, id.category, id.name, i); }
 };
 
 using WidgetPtr = std::unique_ptr<Widget>;

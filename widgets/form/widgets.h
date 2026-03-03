@@ -69,17 +69,13 @@ struct Widget
   inline virtual bool trivial() const { return true; }
 
   inline virtual std::string value()
-  {
-    mc_rtc::log::error_and_throw<std::runtime_error>("::value() is not implemented for this form element");
-  }
+  { mc_rtc::log::error_and_throw<std::runtime_error>("::value() is not implemented for this form element"); }
 
   virtual void collect(mc_rtc::Configuration & out) = 0;
 
   template<typename T = const char *>
   inline std::string label(std::string_view label, T suffix = "")
-  {
-    return fmt::format("{}##{}{}{}{}_{}", label, parent_.id.category, parent_.id.name, name_, suffix, id_);
-  }
+  { return fmt::format("{}##{}{}{}{}_{}", label, parent_.id.category, parent_.id.name, name_, suffix, id_); }
 
   inline std::string name() const
   {
@@ -276,9 +272,7 @@ struct ObjectArrayWidget : public Widget
   }
 
   WidgetPtr clone(ObjectWidget * parent) const override
-  {
-    return std::make_unique<ObjectArrayWidget>(parent_, name_, required_, primaryForm_->clone_object(parent));
-  }
+  { return std::make_unique<ObjectArrayWidget>(parent_, name_, required_, primaryForm_->clone_object(parent)); }
 
   bool ready() override
   {
@@ -342,9 +336,7 @@ struct ObjectArrayWidget : public Widget
   void update_(bool /*required*/, ObjectWidget * /*parent*/) {}
 
   void update(const mc_rtc::Configuration & data_) override
-  {
-    update(data_.operator std::vector<mc_rtc::Configuration>());
-  }
+  { update(data_.operator std::vector<mc_rtc::Configuration>()); }
 
   virtual void update(const std::vector<mc_rtc::Configuration> & data)
   {
@@ -383,14 +375,10 @@ struct GenericArrayWidget : public ObjectArrayWidget
                      ObjectWidgetPtr primary,
                      const std::optional<std::vector<mc_rtc::Configuration>> & data)
   : ObjectArrayWidget(parent, name, required, std::move(primary))
-  {
-    update_(required, primary.get(), data);
-  }
+  { update_(required, primary.get(), data); }
 
   WidgetPtr clone(ObjectWidget * parent) const override
-  {
-    return std::make_unique<GenericArrayWidget>(parent_, name_, required_, primaryForm_->clone_object(parent), data_);
-  }
+  { return std::make_unique<GenericArrayWidget>(parent_, name_, required_, primaryForm_->clone_object(parent), data_); }
 
   void collect(mc_rtc::Configuration & out_) override
   {
@@ -451,9 +439,7 @@ struct OneOfWidget : public Widget
   }
 
   WidgetPtr clone(ObjectWidget * parent) const override
-  {
-    return std::make_unique<OneOfWidget>(parent_, name_, container_->clone_object(parent), data_);
-  }
+  { return std::make_unique<OneOfWidget>(parent_, name_, container_->clone_object(parent), data_); }
 
   bool ready() override { return active_ && active_->ready(); }
 
@@ -533,9 +519,7 @@ struct OneOfWidget : public Widget
   }
 
   void update(const mc_rtc::Configuration & data_) override
-  {
-    update(data_.operator std::pair<size_t, mc_rtc::Configuration>());
-  }
+  { update(data_.operator std::pair<size_t, mc_rtc::Configuration>()); }
 
   inline ObjectWidget * container() noexcept { return container_.get(); }
 
@@ -714,9 +698,7 @@ struct ArrayInput : public SimpleInput<Eigen::VectorXd>
              bool fixed_size);
 
   WidgetPtr clone(ObjectWidget *) const override
-  {
-    return std::make_unique<ArrayInput>(parent_, name_, labels_, value_, fixed_);
-  }
+  { return std::make_unique<ArrayInput>(parent_, name_, labels_, value_, fixed_); }
 
   void draw_() override;
 
@@ -863,9 +845,7 @@ struct Point3DInput : public InteractiveMarkerInput<Eigen::Vector3d, ::mc_rtc::i
   using Base::Base;
 
   WidgetPtr clone(ObjectWidget *) const override
-  {
-    return std::make_unique<Point3DInput>(parent_, name_, value_, interactive_);
-  }
+  { return std::make_unique<Point3DInput>(parent_, name_, value_, interactive_); }
 
   inline void draw_() override
   {
@@ -880,9 +860,7 @@ struct RotationInput : public InteractiveMarkerInput<sva::PTransformd, ::mc_rtc:
   using Base::Base;
 
   WidgetPtr clone(ObjectWidget *) const override
-  {
-    return std::make_unique<RotationInput>(parent_, name_, value_, interactive_);
-  }
+  { return std::make_unique<RotationInput>(parent_, name_, value_, interactive_); }
 
   inline void draw_() override
   {
@@ -903,9 +881,7 @@ struct TransformInput : public InteractiveMarkerInput<sva::PTransformd, ::mc_rtc
   using Base::Base;
 
   WidgetPtr clone(ObjectWidget *) const override
-  {
-    return std::make_unique<TransformInput>(parent_, name_, value_, interactive_);
-  }
+  { return std::make_unique<TransformInput>(parent_, name_, value_, interactive_); }
 
   inline void draw_() override
   {
@@ -924,9 +900,7 @@ struct ComboInput : public SimpleInput<std::string>
              int user_default = -1);
 
   WidgetPtr clone(ObjectWidget *) const override
-  {
-    return std::make_unique<ComboInput>(parent_, name_, values_, send_index_, idx_);
-  }
+  { return std::make_unique<ComboInput>(parent_, name_, values_, send_index_, idx_); }
 
   void draw_() override;
 
@@ -960,9 +934,7 @@ struct DataComboInput : public ComboInput
                  bool send_index);
 
   WidgetPtr clone(ObjectWidget *) const override
-  {
-    return std::make_unique<DataComboInput>(parent_, name_, ref_, send_index_);
-  }
+  { return std::make_unique<DataComboInput>(parent_, name_, ref_, send_index_); }
 
   void draw_() override;
 
