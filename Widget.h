@@ -1,7 +1,5 @@
 #pragma once
 
-#include <mc_control/ControllerClient.h>
-
 #include <imgui.h>
 
 #include <memory>
@@ -12,6 +10,8 @@
 #else
 #  include <spdlog/fmt/bundled/ranges.h>
 #endif
+#include <mc_control/ControllerClient.h>
+#include <mc_rtc/fmt_formatters.h>
 
 namespace mc_rtc::imgui
 {
