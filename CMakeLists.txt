@@ -18,27 +18,30 @@ set(mc_rtc-imgui-SRC
 )
 
 set(mc_rtc-imgui-HDR
-  include/mc_rtc-imgui/widgets/NumberInput.h
-  include/mc_rtc-imgui/widgets/Table.h
-  include/mc_rtc-imgui/widgets/Label.h
-  include/mc_rtc-imgui/widgets/details/SingleInput.h
-  include/mc_rtc-imgui/widgets/NumberSlider.h
-  include/mc_rtc-imgui/widgets/IntegerInput.h
-  include/mc_rtc-imgui/widgets/ComboInput.h
-  include/mc_rtc-imgui/widgets/ArrayLabel.h
-  include/mc_rtc-imgui/widgets/StringInput.h
-  include/mc_rtc-imgui/widgets/ArrayInput.h
-  include/mc_rtc-imgui/widgets/Button.h
-  include/mc_rtc-imgui/widgets/Checkbox.h
-  include/mc_rtc-imgui/widgets/Form.h
-  include/mc_rtc-imgui/widgets/DataComboInput.h
-  include/mc_rtc-imgui/widgets/Schema.h
-  include/mc_rtc-imgui/widgets/form/schema.h
-  include/mc_rtc-imgui/widgets/form/widgets.h
-  include/mc_rtc-imgui/Widget.h
-  include/mc_rtc-imgui/Category.h
-  include/mc_rtc-imgui/Client.h
-  include/mc_rtc-imgui/Plot.h
+include/mc_rtc-imgui/Category.h
+include/mc_rtc-imgui/Widget.h
+include/mc_rtc-imgui/Client.h
+include/mc_rtc-imgui/InteractiveMarker.h
+include/mc_rtc-imgui/widgets/details/SingleInput.h
+include/mc_rtc-imgui/widgets/form/widgets.h
+include/mc_rtc-imgui/widgets/form/schema.h
+include/mc_rtc-imgui/widgets/Widget.h
+include/mc_rtc-imgui/widgets/IntegerInput.h
+include/mc_rtc-imgui/widgets/Button.h
+include/mc_rtc-imgui/widgets/Schema.h
+include/mc_rtc-imgui/widgets/ArrayLabel.h
+include/mc_rtc-imgui/widgets/Table.h
+include/mc_rtc-imgui/widgets/Label.h
+include/mc_rtc-imgui/widgets/DataComboInput.h
+include/mc_rtc-imgui/widgets/ComboInput.h
+include/mc_rtc-imgui/widgets/StringInput.h
+include/mc_rtc-imgui/widgets/IndentedSeparator.h
+include/mc_rtc-imgui/widgets/NumberSlider.h
+include/mc_rtc-imgui/widgets/Checkbox.h
+include/mc_rtc-imgui/widgets/ArrayInput.h
+include/mc_rtc-imgui/widgets/Form.h
+include/mc_rtc-imgui/widgets/NumberInput.h
+include/mc_rtc-imgui/Plot.h
 )
 
 add_library(mc_rtc-imgui SHARED ${mc_rtc-imgui-SRC})
