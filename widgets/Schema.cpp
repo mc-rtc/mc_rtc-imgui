@@ -149,7 +149,7 @@ void Schema::data(const std::string & schema)
   form_.reset(nullptr);
   schema_ = schema;
 #ifndef __EMSCRIPTEN__
-  bfs::path all_schemas = bfs::path(mc_rtc::INSTALL_PREFIX) / "share" / "doc" / "mc_rtc" / "json" / "schemas";
+  bfs::path all_schemas = bfs::path(mc_rtc::JSON_SCHEMA_PATH);
 #else
   bfs::path all_schemas = bfs::path("/assets/schemas");
 #endif
