@@ -4,8 +4,12 @@ project(mc_rtc-imgui LANGUAGES CXX VERSION 1.0.0)
 include(cmake/get-jrl-cmakemodules.cmake)
 jrl_configure_defaults()
 
-jrl_find_package(imgui REQUIRED)
-jrl_find_package(implot REQUIRED)
+if(NOT TARGET imgui::imgui)
+  jrl_find_package(imgui REQUIRED)
+endif()
+if(NOT TARGET implot::implot)
+  jrl_find_package(implot REQUIRED)
+endif()
 jrl_find_package(mc_rtc 2.14 REQUIRED)
 
 set(mc_rtc-imgui-SRC
