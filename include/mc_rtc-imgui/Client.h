@@ -24,6 +24,8 @@ struct Client : public mc_control::ControllerClient
    */
   Client();
 
+  Client(const std::string & sub_conn_uri, const std::string & push_conn_uri, double timeout = 0);
+
   /** Creates a new interactive marker */
   virtual InteractiveMarkerPtr make_marker(const sva::PTransformd & pose = sva::PTransformd::Identity(),
                                            ControlAxis mask = ControlAxis::NONE) = 0;
