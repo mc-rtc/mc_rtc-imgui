@@ -28,7 +28,7 @@ Client::Client() : mc_control::ControllerClient()
   timeout(3.0);
 }
 
-Client::Client(const std::string & sub_conn_uri, const std::string & push_conn_uri, double timeout = 0)
+Client::Client(const std::string & sub_conn_uri, const std::string & push_conn_uri, double timeout)
 : mc_control::ControllerClient(sub_conn_uri, push_conn_uri, timeout)
 {
 }
