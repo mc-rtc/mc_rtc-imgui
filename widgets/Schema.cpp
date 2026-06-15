@@ -11,7 +11,7 @@ namespace details
 {
 
 #ifdef __EMSCRIPTEN__
-inline bfs::path current_path()
+inline fs::path current_path()
 {
   std::vector<char> buffer;
   buffer.reserve(2048);
@@ -21,17 +21,17 @@ inline bfs::path current_path()
     buffer.reserve(2 * buffer.capacity());
     cwd = getcwd(buffer.data(), buffer.capacity());
   }
-  bfs::path out(cwd);
+  fs::path out(cwd);
   return out;
 }
 #endif
 
-inline bfs::path canonical(const bfs::path & p)
+inline fs::path canonical(const fs::path & p)
 {
 #ifndef __EMSCRIPTEN__
-  return bfs::canonical(p);
+  return fs::canonical(p);
 #else
-  return bfs::canonical(p, current_path());
+  return fs::canonical(p, current_path());
 #endif
 }
 
@@ -40,9 +40,9 @@ inline bfs::path canonical(const bfs::path & p)
 namespace
 {
 
-void resolveRef(const bfs::path & path,
+void resolveRef(const fs::path & path,
                 mc_rtc::Configuration conf,
-                const std::function<mc_rtc::Configuration(const bfs::path &)> & loadFn)
+                const std::function<mc_rtc::Configuration(const fs::path &)> & loadFn)
 {
   if(conf.size())
   {
@@ -149,18 +149,18 @@ void Schema::data(const std::string & schema)
   form_.reset(nullptr);
   schema_ = schema;
 #ifndef __EMSCRIPTEN__
-  bfs::path all_schemas = bfs::path(mc_rtc::JSON_SCHEMA_PATH);
+  fs::path all_schemas = fs::path(mc_rtc::JSON_SCHEMA_PATH);
 #else
-  bfs::path all_schemas = bfs::path("/assets/schemas");
+  fs::path all_schemas = fs::path("/assets/schemas");
 #endif
-  bfs::path schema_dir = all_schemas / schema_.c_str();
-  if(!bfs::exists(schema_dir) || !bfs::is_directory(schema_dir))
+  fs::path schema_dir = all_schemas / schema_.c_str();
+  if(!fs::exists(schema_dir) || !fs::is_directory(schema_dir))
   {
     mc_rtc::log::error("Cannot load schema from non existing directory: {}", schema_dir.string());
     return;
   }
-  bfs::directory_iterator dit(schema_dir), endit;
-  std::vector<bfs::path> schemas;
+  fs::directory_iterator dit(schema_dir), endit;
+  std::vector<fs::path> schemas;
   std::copy(dit, endit, std::back_inserter(schemas));
   for(const auto & s : schemas)
   {
@@ -202,17 +202,17 @@ std::optional<std::string> Schema::value(const std::string & name) const
   return "";
 }
 
-mc_rtc::Configuration & Schema::loadSchema(const bfs::path & path)
+mc_rtc::Configuration & Schema::loadSchema(const fs::path & path)
 {
   if(details::canonical(path) != path) { return loadSchema(details::canonical(path)); }
   if(all_schemas_.count(path.string())) { return all_schemas_[path.string()]; }
-  if(!bfs::exists(path))
+  if(!fs::exists(path))
   {
     mc_rtc::log::error_and_throw<std::runtime_error>("No schema can be loaded from {}", path.string());
   }
   auto & schema = all_schemas_[path.string()];
   schema.load(path.string());
-  resolveRef(path, schema, [this](const bfs::path & p) { return loadSchema(p); });
+  resolveRef(path, schema, [this](const fs::path & p) { return loadSchema(p); });
   resolveAllOf(schema);
   return schema;
 }

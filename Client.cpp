@@ -15,15 +15,15 @@
 #include "widgets/StringInput.h"
 #include "widgets/Table.h"
 
-#include <boost/filesystem.hpp>
-namespace bfs = boost::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 namespace mc_rtc::imgui
 {
 
 Client::Client() : mc_control::ControllerClient()
 {
-  std::string socket = fmt::format("ipc://{}", (bfs::temp_directory_path() / "mc_rtc_").string());
+  std::string socket = fmt::format("ipc://{}", (fs::temp_directory_path() / "mc_rtc_").string());
   connect(socket + "pub.ipc", socket + "rep.ipc");
   timeout(3.0);
 }
