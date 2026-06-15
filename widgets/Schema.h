@@ -2,8 +2,8 @@
 
 #include "Widget.h"
 
-#include <boost/filesystem.hpp>
-namespace bfs = boost::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 namespace mc_rtc::imgui
 {
@@ -23,7 +23,7 @@ struct Schema : public Widget
   std::optional<std::string> value(const std::string & name) const;
 
 private:
-  mc_rtc::Configuration & loadSchema(const bfs::path & path);
+  mc_rtc::Configuration & loadSchema(const fs::path & path);
   /** Schema directory used by this widget */
   std::string schema_;
   /** All schemas that should be presented by the user, indexed by title */
